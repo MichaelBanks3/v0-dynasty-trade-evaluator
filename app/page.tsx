@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { SignedIn, SignedOut, UserButton, SignOutButton } from "@clerk/nextjs"
 import { TrendingUp, Users, BarChart3 } from "lucide-react"
 
 export default function HomePage() {
@@ -22,6 +23,17 @@ export default function HomePage() {
               <Link href="/trade/new" className="text-muted-foreground hover:text-foreground">
                 Create Trade
               </Link>
+              <SignedOut>
+                <Link href="/sign-in" className="text-muted-foreground hover:text-foreground" data-testid="auth-signin-link">
+                  Sign in
+                </Link>
+              </SignedOut>
+              <SignedIn>
+                <UserButton appearance={{ elements: { userButtonTrigger: "h-8 w-8" } }} data-testid="auth-user-button" />
+                <SignOutButton>
+                  <button className="text-muted-foreground hover:text-foreground" data-testid="auth-signout-button">Sign out</button>
+                </SignOutButton>
+              </SignedIn>
             </div>
           </div>
         </div>

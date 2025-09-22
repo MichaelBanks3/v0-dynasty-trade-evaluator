@@ -9,6 +9,8 @@ import { Separator } from "@/components/ui/separator"
 import { WinNowFutureChart } from "@/components/WinNowFutureChart"
 import { useTradeStore } from "@/lib/store"
 import { ArrowLeft, Edit, Save, TrendingUp, TrendingDown, Minus } from "lucide-react"
+import { SignedIn, SignedOut, UserButton, SignOutButton } from "@clerk/nextjs"
+import { AuthEnvBanner } from "@/components/AuthEnvBanner"
 import { useEffect, useState } from "react"
 
 export default function TradeResultPage() {
@@ -108,6 +110,17 @@ export default function TradeResultPage() {
               <Link href="/trade/new" className="text-muted-foreground hover:text-foreground">
                 Create Trade
               </Link>
+              <SignedOut>
+                <Link href="/sign-in" className="text-muted-foreground hover:text-foreground" data-testid="auth-signin-link">
+                  Sign in
+                </Link>
+              </SignedOut>
+              <SignedIn>
+                <UserButton data-testid="auth-user-button" />
+                <SignOutButton>
+                  <button className="text-muted-foreground hover:text-foreground" data-testid="auth-signout-button">Sign out</button>
+                </SignOutButton>
+              </SignedIn>
             </div>
           </div>
         </div>
@@ -115,6 +128,7 @@ export default function TradeResultPage() {
 
       {/* Results Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AuthEnvBanner />
         {/* Header */}
         <div className="flex items-center space-x-4 mb-8">
           <Button variant="ghost" onClick={() => router.back()} className="p-2">

@@ -2,6 +2,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { SignedIn, SignedOut, UserButton, SignOutButton } from "@clerk/nextjs"
+import { AuthEnvBanner } from "@/components/AuthEnvBanner"
 import { Plus, History, Settings, TrendingUp, TrendingDown, Minus } from "lucide-react"
 
 // Mock recent trades data
@@ -51,6 +53,17 @@ export default function DashboardPage() {
               <Link href="/trade/new" className="text-muted-foreground hover:text-foreground">
                 Create Trade
               </Link>
+              <SignedOut>
+                <Link href="/sign-in" className="text-muted-foreground hover:text-foreground" data-testid="auth-signin-link">
+                  Sign in
+                </Link>
+              </SignedOut>
+              <SignedIn>
+                <UserButton data-testid="auth-user-button" />
+                <SignOutButton>
+                  <button className="text-muted-foreground hover:text-foreground" data-testid="auth-signout-button">Sign out</button>
+                </SignOutButton>
+              </SignedIn>
             </div>
           </div>
         </div>
@@ -58,6 +71,7 @@ export default function DashboardPage() {
 
       {/* Dashboard Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AuthEnvBanner />
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
           <p className="text-muted-foreground mt-2">Manage your dynasty trades and league settings</p>
