@@ -9,6 +9,22 @@ datasource db {
   directUrl = env("DIRECT_URL") // <-- add this
 }
 
+enum Position {
+  QB
+  RB
+  WR
+  TE
+}
+
+model Player {
+  id        Int      @id @default(autoincrement())
+  name      String
+  position  Position
+  team      String
+  value     Int
+  createdAt DateTime @default(now())
+}
+
 model User {
   id        String   @id // Clerk userId (e.g., "user_123")
   email     String?  @unique
@@ -18,15 +34,16 @@ model User {
 
 model Trade {
   id         String   @id @default(uuid())
-  userId     String
+  userId     String?
   createdAt  DateTime @default(now())
+  teamAIds   Json
+  teamBIds   Json
+  totalA     Int
+  totalB     Int
+  verdict    String
+  diff       Int
 
-  // JSON blobs for flexible iteration:
-  sideAJson  Json
-  sideBJson  Json
-  resultJson Json
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
