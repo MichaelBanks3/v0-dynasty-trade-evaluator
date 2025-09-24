@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // <-- add this
+}
+
+model User {
+  id        String   @id // Clerk userId (e.g., "user_123")
+  email     String?  @unique
+  createdAt DateTime @default(now())
+  trades    Trade[]
+}
+
+model Trade {
+  id         String   @id @default(uuid())
+  userId     String
+  createdAt  DateTime @default(now())
+
+  // JSON blobs for flexible iteration:
+  sideAJson  Json
+  sideBJson  Json
+  resultJson Json
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
