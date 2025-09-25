@@ -42,7 +42,11 @@ export async function getAvailablePlayers(
     },
     include: {
       valuations: {
-        where: { settingsHash: 'default' },
+        where: { 
+          scoring: 'PPR',
+          superflex: false,
+          tePremium: 1.0
+        },
         take: 1
       }
     },

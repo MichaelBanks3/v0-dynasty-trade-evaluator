@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { teamAAssets, teamBAssets, settings } = body
 
-    if (!teamAAssets || !teamBAssets) {
+    if (!teamAAssets || !teamBAssets || teamAAssets.length === 0 || teamBAssets.length === 0) {
       return NextResponse.json({ error: 'Missing team assets' }, { status: 400 })
     }
 

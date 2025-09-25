@@ -75,7 +75,11 @@ export async function getPlayerData(playerIds: string[]): Promise<Player[]> {
     where: { id: { in: playerIds } },
     include: {
       valuations: {
-        where: { settingsHash: 'default' }, // Use default settings for now
+        where: { 
+          scoring: 'PPR',
+          superflex: false,
+          tePremium: 1.0
+        }, // Use default settings for now
         take: 1
       }
     }
