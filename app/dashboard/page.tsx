@@ -9,25 +9,40 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AlertCircle, Plus, ExternalLink, Calendar, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { formatSettingsForDisplay } from '@/lib/settings'
+import { formatPts, formatPct } from '@/lib/format'
+import { LeagueGrid } from '@/components/dashboard/LeagueGrid'
+import { SavedTradesTable } from '@/components/trade/SavedTradesTable'
 
-interface TradeHistory {
+interface SavedTrade {
   id: string
   slug: string
+  status: 'COMPLETED' | 'REQUESTED' | 'DENIED' | 'SANDBOX'
   verdict: string
-  nowDelta: number
-  futureDelta: number
-  totalA: number
-  totalB: number
+  teamATotal: number
+  teamBTotal: number
+  deltaPct: number
   settings: any
   createdAt: string
+}
+
+interface League {
+  id: string
+  name: string
+  season: string
+  sport: string
+  rank?: number
+  score?: number
+  teamCount?: number
 }
 
 export default function DashboardPage() {
   const { isSignedIn, userId } = useAuth()
   const router = useRouter()
-  const [trades, setTrades] = useState<TradeHistory[]>([])
+  const [trades, setTrades] = useState<SavedTrade[]>([])
+  const [leagues, setLeagues] = useState<League[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<string>('all')
@@ -39,23 +54,32 @@ export default function DashboardPage() {
       return
     }
 
-    const fetchTrades = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/trades/history')
-        if (!response.ok) {
+        const [tradesResponse, leaguesResponse] = await Promise.all([
+          fetch('/api/trades'),
+          fetch('/api/sleeper/leagues')
+        ])
+        
+        if (!tradesResponse.ok) {
           throw new Error('Failed to fetch trades')
         }
         
-        const data = await response.json()
-        setTrades(data)
+        const tradesData = await tradesResponse.json()
+        setTrades(tradesData.trades || [])
+        
+        if (leaguesResponse.ok) {
+          const leaguesData = await leaguesResponse.json()
+          setLeagues(leaguesData.leagues || [])
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load trades')
+        setError(err instanceof Error ? err.message : 'Failed to load data')
       } finally {
         setLoading(false)
       }
     }
 
-    fetchTrades()
+    fetchData()
   }, [isSignedIn, router])
 
   const getVerdictIcon = (verdict: string) => {
@@ -125,14 +149,21 @@ export default function DashboardPage() {
     )
   }
 
+  const tradesByStatus = {
+    COMPLETED: trades.filter(t => t.status === 'COMPLETED'),
+    REQUESTED: trades.filter(t => t.status === 'REQUESTED'),
+    DENIED: trades.filter(t => t.status === 'DENIED'),
+    SANDBOX: trades.filter(t => t.status === 'SANDBOX'),
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-text">Trade History</h1>
+          <h1 className="text-3xl font-bold text-text">Dashboard</h1>
           <p className="text-subtext mt-2">
-            {trades.length} saved trades
+            {leagues.length} leagues • {trades.length} trades
           </p>
         </div>
         <Button asChild className="bg-accent text-accent-contrast hover:bg-accent/90">
@@ -143,125 +174,45 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      {trades.length === 0 ? (
-        /* Empty State */
-        <Card>
-          <CardContent className="text-center py-16">
-            <div className="max-w-md mx-auto">
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <Plus className="h-8 w-8 text-subtext" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2 text-text">No trades yet</h3>
-              <p className="text-subtext mb-6">
-                Create your first trade evaluation to get started
-              </p>
-              <Button asChild className="bg-accent text-accent-contrast hover:bg-accent/90">
-                <a href="/trade">Create Your First Trade</a>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          {/* Filters */}
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Search trades..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-surface border-border"
-              />
-            </div>
-            <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-48 bg-surface border-border">
-                <SelectValue placeholder="Filter by verdict" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Trades</SelectItem>
-                <SelectItem value="FAVORS_A">Favors Team A</SelectItem>
-                <SelectItem value="FAVORS_B">Favors Team B</SelectItem>
-                <SelectItem value="FAIR">Fair Trades</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      {/* Leagues Grid */}
+      <div>
+        <h2 className="text-xl font-semibold text-text mb-4">Your Leagues</h2>
+        <LeagueGrid leagues={leagues} />
+      </div>
 
-          {/* Trades Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-text">Recent Trades</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-subtext">Date</TableHead>
-                    <TableHead className="text-subtext">Verdict</TableHead>
-                    <TableHead className="text-subtext">Team A Total</TableHead>
-                    <TableHead className="text-subtext">Team B Total</TableHead>
-                    <TableHead className="text-subtext">Delta</TableHead>
-                    <TableHead className="text-subtext">Settings</TableHead>
-                    <TableHead className="text-subtext">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredTrades.map((trade) => (
-                    <TableRow key={trade.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-subtext" />
-                          {new Date(trade.createdAt).toLocaleDateString()}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {getVerdictIcon(trade.verdict)}
-                          <Badge className={getVerdictColor(trade.verdict)}>
-                            {trade.verdict.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-mono text-text">
-                          {Number(trade.totalA || 0).toLocaleString()}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-mono text-text">
-                          {Number(trade.totalB || 0).toLocaleString()}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-mono text-text">
-                          {calculateCompositeDelta(trade.totalA, trade.totalB)}%
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="font-mono text-xs bg-muted/50 border-border">
-                          {formatSettingsForDisplay(trade.settings)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          asChild
-                          className="text-subtext hover:text-text"
-                        >
-                          <a href={`/t/${trade.slug}`}>
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            View
-                          </a>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </>
-      )}
+      {/* Saved Trades */}
+      <div>
+        <h2 className="text-xl font-semibold text-text mb-4">Saved Trades</h2>
+        <Tabs defaultValue="SANDBOX" className="space-y-4">
+          <TabsList className="bg-muted/20 border border-border/50">
+            <TabsTrigger value="SANDBOX" className="data-[state=active]:bg-accent data-[state=active]:text-accent-contrast">
+              Sandbox ({tradesByStatus.SANDBOX.length})
+            </TabsTrigger>
+            <TabsTrigger value="REQUESTED" className="data-[state=active]:bg-accent data-[state=active]:text-accent-contrast">
+              Requested ({tradesByStatus.REQUESTED.length})
+            </TabsTrigger>
+            <TabsTrigger value="COMPLETED" className="data-[state=active]:bg-accent data-[state=active]:text-accent-contrast">
+              Completed ({tradesByStatus.COMPLETED.length})
+            </TabsTrigger>
+            <TabsTrigger value="DENIED" className="data-[state=active]:bg-accent data-[state=active]:text-accent-contrast">
+              Denied ({tradesByStatus.DENIED.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="SANDBOX">
+            <SavedTradesTable trades={tradesByStatus.SANDBOX} />
+          </TabsContent>
+          <TabsContent value="REQUESTED">
+            <SavedTradesTable trades={tradesByStatus.REQUESTED} />
+          </TabsContent>
+          <TabsContent value="COMPLETED">
+            <SavedTradesTable trades={tradesByStatus.COMPLETED} />
+          </TabsContent>
+          <TabsContent value="DENIED">
+            <SavedTradesTable trades={tradesByStatus.DENIED} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   )
 }

@@ -26,6 +26,13 @@ enum PlayerStatus {
   RETIRED
 }
 
+enum TradeStatus {
+  COMPLETED
+  REQUESTED
+  DENIED
+  SANDBOX // evaluated but not sent
+}
+
 // Core player data from Sleeper API
 model Player {
   id          Int          @id @default(autoincrement())
@@ -108,46 +115,55 @@ model Pick {
 
 // Enhanced trade model
 model Trade {
-  id        String   @id @default(cuid())
-  userId    String
-  createdAt DateTime @default(now())
+  id         String      @id @default(cuid())
+  userId     String?
+  status     TradeStatus @default(SANDBOX)
+  payload    Json
+  verdict    String?
+  teamATotal Float?
+  teamBTotal Float?
+  deltaPct   Float?
+  createdAt  DateTime    @default(now())
 
-  // Trade assets (JSONB for flexibility)
+  // Legacy fields for backward compatibility
   teamA Json? // Array of {type: "player"|"pick", id: number}
   teamB Json? // Array of {type: "player"|"pick", id: number}
-
-  // League settings used for evaluation
   settings Json? // {scoring, superflex, tePremium, rosterConfig}
-
-  // Evaluation results
-  verdict            String // FAIR, FAVORS_A, FAVORS_B
   nowDelta           Float? // Win-now value difference
   futureDelta        Float? // Future value difference
   breakdown          Json? // Detailed component breakdown
   evaluationSnapshot Json? // Full evaluation result snapshot for sharing
   slug               String? @unique // Shareable slug for public access
-
-  // Legacy fields for backward compatibility
   sideAPlayerIds String[] @default([])
   sideBPlayerIds String[] @default([])
   totalA         Int      @default(0)
   totalB         Int      @default(0)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id])
 
-  @@index([userId])
-  @@index([createdAt])
+  @@index([userId, status, createdAt])
   @@index([slug])
 }
 
 // User model (enhanced)
 model User {
-  id          String        @id // Clerk userId
-  email       String?       @unique
-  createdAt   DateTime      @default(now())
-  trades      Trade[]
-  settings    UserSettings?
-  teamProfile TeamProfile?
+  id               String   @id @default(cuid())
+  email            String?  @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Sleeper linkage
+  sleeperUserId    String?   @unique
+  sleeperUsername  String?
+
+  // relations
+  leagues          LeagueLink[]
+  trades           Trade[]
+  settings         UserSettings?
+  teamProfile      TeamProfile?
+  powerIndexSnapshots PowerIndexSnapshot[]
+
+  @@index([sleeperUserId])
 }
 
 // User settings model
@@ -363,4 +379,34 @@ model AdminAction {
   @@index([action])
   @@index([userId])
   @@index([createdAt])
+}
+
+// League linkage for users
+model LeagueLink {
+  id        String   @id @default(cuid())
+  userId    String
+  leagueId  String   // Sleeper league_id
+  season    String
+  name      String
+  sport     String   // "nfl"
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, leagueId])
+  @@index([leagueId])
+}
+
+// Power index snapshots for tracking team performance
+model PowerIndexSnapshot {
+  id        String   @id @default(cuid())
+  userId    String
+  leagueId  String
+  score     Float
+  rank      Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, leagueId, createdAt])
 }

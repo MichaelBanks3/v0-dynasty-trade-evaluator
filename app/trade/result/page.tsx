@@ -18,6 +18,8 @@ import { LeagueSettings, DEFAULT_SETTINGS } from "@/lib/settings"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { StatBar } from "@/components/ui/StatBar"
 import { formatPts, safeNumber } from "@/lib/format"
+import { GuestBanner } from "@/components/GuestBanner"
+import { useAuth } from "@clerk/nextjs"
 
 export default function TradeResultPage() {
   const [mounted, setMounted] = useState(false)
@@ -46,6 +48,7 @@ function TradeResultPageContent() {
   const [error, setError] = useState<string | null>(null)
   const [settings, setSettings] = useState<LeagueSettings>(DEFAULT_SETTINGS)
   const [leagueInfo, setLeagueInfo] = useState<{ leagueId?: string; teamId?: string } | null>(null)
+  const { isSignedIn } = useAuth()
 
   // Use store selectors directly for reactivity
   const teamAAssets = useTradeStore((state: any) => state.teamAAssets)
@@ -227,11 +230,13 @@ ${result.explanation}`
 
   return (
     <div className="space-y-6">
+      {!isSignedIn && <GuestBanner />}
+      
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-text">Trade Evaluation Results</h1>
         <SettingsDrawer onSettingsChange={setSettings} currentSettings={settings} />
-        </div>
-
+      </div>
+      
       <div>
         <ActiveSettings settings={settings} />
       </div>

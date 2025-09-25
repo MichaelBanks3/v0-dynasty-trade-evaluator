@@ -1,70 +1,49 @@
-"use client"
-
 import { cn } from "@/lib/utils"
-import { safePercentage } from "@/lib/format"
 
 interface StatBarProps {
   label: string
-  value: number | string | null | undefined
-  max: number | string | null | undefined
-  tone?: "blue" | "green" | "purple" | "orange" | "red"
-  className?: string
+  value: number
+  max: number
+  tone?: 'blue' | 'green' | 'purple' | 'yellow' | 'red'
   showValue?: boolean
-  showPercentage?: boolean
-}
-
-const toneClasses = {
-  blue: "bg-blue-500",
-  green: "bg-green-500", 
-  purple: "bg-purple-500",
-  orange: "bg-orange-500",
-  red: "bg-red-500",
+  className?: string
 }
 
 export function StatBar({ 
   label, 
   value, 
   max, 
-  tone = "blue", 
-  className,
+  tone = 'blue', 
   showValue = true,
-  showPercentage = true
+  className 
 }: StatBarProps) {
-  const percentage = safePercentage(value, max)
-  const displayValue = Number(value) || 0
-  const displayMax = Number(max) || 0
+  const percentage = max > 0 ? Math.min((value / max) * 100, 100) : 0
+  
+  const toneClasses = {
+    blue: 'bg-blue-500',
+    green: 'bg-green-500', 
+    purple: 'bg-purple-500',
+    yellow: 'bg-yellow-500',
+    red: 'bg-red-500'
+  }
 
   return (
     <div className={cn("space-y-1", className)}>
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center justify-between text-xs">
         <span className="text-subtext">{label}</span>
-        <div className="flex items-center gap-2">
-          {showValue && (
-            <span className="font-medium text-text">
-              {displayValue.toLocaleString()}
-            </span>
-          )}
-          {showPercentage && (
-            <span className="text-xs text-subtext">
-              {Math.round(percentage)}%
-            </span>
-          )}
-        </div>
+        {showValue && (
+          <span className="text-text font-mono">
+            {Math.round(value).toLocaleString()}
+          </span>
+        )}
       </div>
-      <div 
-        className="w-full bg-muted/20 rounded-full h-2 overflow-hidden"
-        role="progressbar"
-        aria-valuenow={displayValue}
-        aria-valuemin={0}
-        aria-valuemax={displayMax}
-        aria-label={`${label}: ${displayValue.toLocaleString()} out of ${displayMax.toLocaleString()}`}
-      >
+      <div className="w-full bg-muted/20 rounded-full h-2 overflow-hidden">
         <div 
           className={cn(
-            "h-2 rounded-full transition-all duration-300",
+            "h-full transition-all duration-300 ease-out rounded-full",
             toneClasses[tone]
           )}
-          style={{ width: `${Math.min(100, percentage)}%` }}
+          style={{ width: `${percentage}%` }}
         />
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { TradeBuilder } from "@/components/TradeBuilder"
 import { AuthEnvBanner } from "@/components/AuthEnvBanner"
 import { OnboardingPanel } from "@/components/OnboardingPanel"
+import { GuestBanner } from "@/components/GuestBanner"
 import { useTradeStore, type Asset } from "@/lib/store"
 import { safeArray } from "@/lib/safe"
 import { Button } from "@/components/ui/button"
@@ -12,6 +13,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useGlobalKeyboard } from "@/hooks/use-global-keyboard"
 import { TrendingUp, TrendingDown, Minus, Users, Calendar } from "lucide-react"
+import { useAuth } from "@clerk/nextjs"
 
 export default function TradePage() {
   const router = useRouter()
@@ -57,6 +59,7 @@ export default function TradePage() {
 function TradePageContent() {
   const router = useRouter()
   const { searchInputRef } = useGlobalKeyboard()
+  const { isSignedIn } = useAuth()
 
   // Use store selectors directly for reactivity
   const teamAAssets = useTradeStore((state: any) => state.teamAAssets)
@@ -98,6 +101,8 @@ function TradePageContent() {
   return (
     <div className="space-y-6">
       <AuthEnvBanner />
+      
+      {!isSignedIn && <GuestBanner />}
       
       <div className="mb-8">
         <div className="flex items-center justify-between">

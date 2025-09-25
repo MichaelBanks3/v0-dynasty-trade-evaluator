@@ -8,7 +8,7 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest) {
-  const { userId } = auth()
+  const { userId } = await auth()
   
   try {
     const body = await request.json()
@@ -31,7 +31,9 @@ export async function POST(request: NextRequest) {
     const valuations = await prisma.valuation.findMany({
       where: {
         playerId: { in: allAssetIds },
-        settingsHash: settings ? JSON.stringify(settings) : 'default'
+        scoring: settings?.scoring || 'PPR',
+        superflex: settings?.superflex || false,
+        tePremium: settings?.tePremium || 1.0
       },
       include: {
         player: true
@@ -54,9 +56,9 @@ export async function POST(request: NextRequest) {
         position: v.player?.position || 'UNKNOWN',
         age: v.player?.age || 0,
         team: v.player?.team || 'UNKNOWN',
-        nowScore: v.nowScore,
-        futureScore: v.futureScore,
-        composite: v.composite
+        nowScore: v.nowScore || 0,
+        futureScore: v.futureScore || 0,
+        composite: (v.nowScore || 0) + (v.futureScore || 0)
       })),
       ...picks.map(p => ({
         id: p.id,
@@ -83,8 +85,8 @@ export async function POST(request: NextRequest) {
       teamProfile: teamProfile ? {
         timeline: teamProfile.timeline,
         riskTolerance: teamProfile.riskTolerance,
-        roster: JSON.parse(teamProfile.roster as string),
-        ownedPicks: JSON.parse(teamProfile.ownedPicks as string)
+        roster: teamProfile.roster ? JSON.parse(teamProfile.roster as string) : [],
+        ownedPicks: teamProfile.ownedPicks ? JSON.parse(teamProfile.ownedPicks as string) : []
       } : null
     })
 
@@ -102,7 +104,7 @@ export async function POST(request: NextRequest) {
       teamProfile: teamProfile ? {
         timeline: teamProfile.timeline,
         riskTolerance: teamProfile.riskTolerance,
-        hasRoster: (JSON.parse(teamProfile.roster as string) as string[]).length > 0
+        hasRoster: teamProfile.roster ? (JSON.parse(teamProfile.roster as string) as string[]).length > 0 : false
       } : null
     })
 
