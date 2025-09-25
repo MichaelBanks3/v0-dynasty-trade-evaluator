@@ -7,9 +7,17 @@ import { X } from "lucide-react"
 import { useTradeStore } from "@/lib/store"
 import { safeArray } from "@/lib/safe"
 import { PlayerSearch } from "./PlayerSearch"
+import { ActiveSideControl } from "./ActiveSideControl"
+import type { Asset } from "@/lib/store"
 
 export function TradeBuilder() {
-  const { teamAAssets, teamBAssets, removeAssetFromTeam, addAssetToTeam } = useTradeStore()
+  const { 
+    teamAAssets, 
+    teamBAssets, 
+    activeSide,
+    removeAssetFromTeam, 
+    setActiveSide 
+  } = useTradeStore()
 
   // Safely get arrays
   const safeTeamAAssets = safeArray(teamAAssets)
@@ -18,25 +26,35 @@ export function TradeBuilder() {
   const teamATotal = safeTeamAAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
   const teamBTotal = safeTeamBAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
 
-  // Get all selected assets for the search component
-  const allSelectedAssets = [...safeTeamAAssets, ...safeTeamBAssets]
+  const handlePanelClick = (team: "A" | "B") => {
+    setActiveSide(team)
+  }
 
-  const handleAssetSelect = (asset: any) => {
-    // Add to Team A by default (user can move later if needed)
-    addAssetToTeam("A", asset)
+  const handleAssetAdded = (asset: Asset, team: "A" | "B") => {
+    // Asset was successfully added, no additional action needed
+    console.log(`Added ${asset?.label} to Team ${team}`)
   }
 
   return (
     <div className="space-y-8">
+      {/* Active Side Control */}
+      <div className="flex items-center gap-4">
+        <span className="text-sm font-medium text-muted-foreground">Add to:</span>
+        <ActiveSideControl />
+      </div>
+
       {/* Player Search */}
-      <PlayerSearch 
-        onSelectAsset={handleAssetSelect}
-        selectedAssets={allSelectedAssets}
-      />
+      <PlayerSearch onAssetAdded={handleAssetAdded} />
 
       {/* Team A */}
-      <Card data-testid="team-a-builder">
-        <CardHeader>
+      <Card 
+        data-testid="team-a-builder"
+        className={`transition-colors ${activeSide === "A" ? "ring-2 ring-primary ring-offset-2" : ""}`}
+      >
+        <CardHeader 
+          className="cursor-pointer"
+          onClick={() => handlePanelClick("A")}
+        >
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Team A</CardTitle>
             <Badge variant="outline" className="text-sm font-medium" data-testid="team-a-total">
@@ -46,7 +64,10 @@ export function TradeBuilder() {
         </CardHeader>
         <CardContent>
           {safeTeamAAssets.length === 0 ? (
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+            <div 
+              className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:bg-accent/50 transition-colors"
+              onClick={() => handlePanelClick("A")}
+            >
               <p className="text-muted-foreground">No assets yet</p>
               <p className="text-sm text-muted-foreground mt-1">Search and add players or picks above</p>
             </div>
@@ -96,8 +117,14 @@ export function TradeBuilder() {
       </Card>
 
       {/* Team B */}
-      <Card data-testid="team-b-builder">
-        <CardHeader>
+      <Card 
+        data-testid="team-b-builder"
+        className={`transition-colors ${activeSide === "B" ? "ring-2 ring-primary ring-offset-2" : ""}`}
+      >
+        <CardHeader 
+          className="cursor-pointer"
+          onClick={() => handlePanelClick("B")}
+        >
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Team B</CardTitle>
             <Badge variant="outline" className="text-sm font-medium" data-testid="team-b-total">
@@ -107,7 +134,10 @@ export function TradeBuilder() {
         </CardHeader>
         <CardContent>
           {safeTeamBAssets.length === 0 ? (
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+            <div 
+              className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:bg-accent/50 transition-colors"
+              onClick={() => handlePanelClick("B")}
+            >
               <p className="text-muted-foreground">No assets yet</p>
               <p className="text-sm text-muted-foreground mt-1">Search and add players or picks above</p>
             </div>
