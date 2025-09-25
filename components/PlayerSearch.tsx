@@ -1,18 +1,45 @@
 "use client"
 
-import { useState, useEffect, useMemo, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Search, Plus, ChevronDown, X } from "lucide-react"
-import { useTradeStore } from "@/lib/store"
+import { useTradeStore, type Asset } from "@/lib/store"
 import { safeArray } from "@/lib/safe"
 import { useToast } from "./Toast"
-import type { Asset } from "@/lib/store"
 
 interface PlayerSearchProps {
   onAssetAdded?: (asset: Asset, team: "A" | "B") => void
+}
+
+// Normalize API response to our Asset shape
+function normalizeAsset(apiAsset: any): Asset {
+  if (apiAsset.type === "pick") {
+    return {
+      id: apiAsset.id,
+      kind: "pick",
+      label: apiAsset.label,
+      value: apiAsset.value,
+      meta: {
+        year: parseInt(apiAsset.label.split(' ')[0]) || new Date().getFullYear(),
+        round: parseInt(apiAsset.label.split(' ')[2]) || 1
+      }
+    }
+  } else {
+    return {
+      id: apiAsset.id,
+      kind: "player",
+      label: apiAsset.label,
+      value: apiAsset.value,
+      meta: {
+        position: apiAsset.position,
+        team: apiAsset.team,
+        age: apiAsset.age
+      }
+    }
+  }
 }
 
 export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
@@ -40,8 +67,8 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
         const response = await fetch(`/api/players?q=${encodeURIComponent(query)}`)
         const data = await response.json()
         
-        // Safely handle the response
-        const results = safeArray(data)
+        // Safely handle the response and normalize assets
+        const results = safeArray(data).map(normalizeAsset)
         setSearchResults(results)
         setHasSearched(true)
       } catch (error) {
@@ -66,7 +93,7 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
       try {
         const response = await fetch('/api/players')
         const data = await response.json()
-        const results = safeArray(data)
+        const results = safeArray(data).map(normalizeAsset)
         setSearchResults(results.slice(0, 10)) // Show top 10 popular players
         setHasSearched(true)
       } catch (error) {
@@ -79,26 +106,35 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
     loadPopularPlayers()
   }, [])
 
-  const handleAddToTeam = (asset: Asset, team: "A" | "B") => {
-    if (isAssetInAnyTeam(asset?.id || '')) {
+  // Single helper function for adding assets
+  const handleAddToTeam = (asset: Asset, targetTeam: "A" | "B") => {
+    // Read current state at click time (not stale closure)
+    const currentActiveSide = useTradeStore.getState().activeSide
+    const currentIsAssetInAnyTeam = useTradeStore.getState().isAssetInAnyTeam
+    
+    if (currentIsAssetInAnyTeam(asset.id)) {
       showToast("This player/pick is already on a team")
       return
     }
 
-    const success = addAssetToTeam(team, asset)
+    const success = addAssetToTeam(targetTeam, asset)
     if (success) {
-      onAssetAdded?.(asset, team)
+      showToast(`Added to Team ${targetTeam}`)
+      onAssetAdded?.(asset, targetTeam)
       setSearchTerm("")
       setIsOpen(false)
     } else {
-      showToast("Failed to add player/pick")
+      showToast("Cannot add—unknown error")
     }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent, asset: Asset) => {
     if (e.key === 'Enter') {
       e.preventDefault()
-      handleAddToTeam(asset, activeSide)
+      e.stopPropagation()
+      // Use current active side at keypress time
+      const currentActiveSide = useTradeStore.getState().activeSide
+      handleAddToTeam(asset, currentActiveSide)
     }
   }
 
@@ -150,37 +186,42 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
                   ) : searchResults.length > 0 ? (
                     <div className="p-2 space-y-1">
                       {searchResults.map((asset) => {
-                        const isAlreadyAdded = isAssetInAnyTeam(asset?.id || '')
-                        const isDropdownOpen = showDropdown === asset?.id
+                        const isAlreadyAdded = isAssetInAnyTeam(asset.id)
+                        const isDropdownOpen = showDropdown === asset.id
                         
                         return (
                           <div
-                            key={asset?.id || Math.random()}
+                            key={asset.id}
                             className="flex items-center justify-between p-2 hover:bg-accent rounded cursor-pointer"
-                            data-testid={`search-result-${asset?.id || 'unknown'}`}
+                            data-testid={`search-result-${asset.id}`}
                             onKeyDown={(e) => handleKeyDown(e, asset)}
                             tabIndex={0}
                           >
                             <div className="flex items-center space-x-3 flex-1">
                               <div>
-                                <p className="font-medium">{asset?.label || 'Unknown Asset'}</p>
+                                <p className="font-medium">{asset.label}</p>
                                 <div className="flex items-center space-x-2 mt-1">
-                                  <Badge variant={asset?.type === "player" ? "default" : "secondary"} className="text-xs">
-                                    {asset?.type === "player" ? (asset?.position || 'Unknown') : "Pick"}
+                                  <Badge variant={asset.kind === "player" ? "default" : "secondary"} className="text-xs">
+                                    {asset.kind === "player" ? (asset.meta?.position || 'Unknown') : "Pick"}
                                   </Badge>
-                                  {asset?.type === "player" && (
+                                  {asset.kind === "player" && (
                                     <>
                                       <Badge variant="outline" className="text-xs">
-                                        {asset?.team || 'Unknown'}
+                                        {asset.meta?.team || 'Unknown'}
                                       </Badge>
-                                      <span className="text-xs text-muted-foreground">Age {asset?.age || 'Unknown'}</span>
+                                      <span className="text-xs text-muted-foreground">Age {asset.meta?.age || 'Unknown'}</span>
                                     </>
+                                  )}
+                                  {asset.kind === "pick" && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {asset.meta?.year} Round {asset.meta?.round}
+                                    </Badge>
                                   )}
                                 </div>
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <span className="text-sm font-medium text-muted-foreground">{asset?.baseValue || 0}</span>
+                              <span className="text-sm font-medium text-muted-foreground">{asset.value}</span>
                               {isAlreadyAdded ? (
                                 <Badge variant="secondary" className="text-xs">
                                   Added
@@ -191,8 +232,12 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
                                     variant="ghost"
                                     size="sm"
                                     className="h-8 w-8 p-0"
-                                    onClick={() => handleAddToTeam(asset, activeSide)}
-                                    data-testid={`add-${asset?.id || 'unknown'}-${activeSide.toLowerCase()}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      const currentActiveSide = useTradeStore.getState().activeSide
+                                      handleAddToTeam(asset, currentActiveSide)
+                                    }}
+                                    data-testid={`add-${asset.id}-${activeSide.toLowerCase()}`}
                                   >
                                     <Plus className="h-4 w-4" />
                                   </Button>
@@ -200,8 +245,11 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
                                     variant="ghost"
                                     size="sm"
                                     className="h-6 w-4 p-0 ml-1"
-                                    onClick={() => setShowDropdown(isDropdownOpen ? null : asset?.id || '')}
-                                    data-testid={`dropdown-${asset?.id || 'unknown'}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setShowDropdown(isDropdownOpen ? null : asset.id)
+                                    }}
+                                    data-testid={`dropdown-${asset.id}`}
                                   >
                                     <ChevronDown className="h-3 w-3" />
                                   </Button>
@@ -212,11 +260,12 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
                                           variant="ghost"
                                           size="sm"
                                           className="w-full justify-start text-xs"
-                                          onClick={() => {
+                                          onClick={(e) => {
+                                            e.stopPropagation()
                                             handleAddToTeam(asset, "A")
                                             setShowDropdown(null)
                                           }}
-                                          data-testid={`add-${asset?.id || 'unknown'}-a`}
+                                          data-testid={`add-${asset.id}-a`}
                                         >
                                           Add to Team A
                                         </Button>
@@ -224,11 +273,12 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
                                           variant="ghost"
                                           size="sm"
                                           className="w-full justify-start text-xs"
-                                          onClick={() => {
+                                          onClick={(e) => {
+                                            e.stopPropagation()
                                             handleAddToTeam(asset, "B")
                                             setShowDropdown(null)
                                           }}
-                                          data-testid={`add-${asset?.id || 'unknown'}-b`}
+                                          data-testid={`add-${asset.id}-b`}
                                         >
                                           Add to Team B
                                         </Button>

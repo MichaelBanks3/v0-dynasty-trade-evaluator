@@ -3,7 +3,7 @@
 import { TradeBuilder } from "@/components/TradeBuilder"
 import { TradeSummary } from "@/components/TradeSummary"
 import { AuthEnvBanner } from "@/components/AuthEnvBanner"
-import { useTradeStore } from "@/lib/store"
+import { useTradeStore, type Asset } from "@/lib/store"
 import { safeArray } from "@/lib/safe"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -63,8 +63,8 @@ function TradePageContent() {
   const safeTeamAAssets = safeArray(teamAAssets)
   const safeTeamBAssets = safeArray(teamBAssets)
 
-  const teamATotal = safeTeamAAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
-  const teamBTotal = safeTeamBAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
+  const teamATotal = safeTeamAAssets.reduce((sum: number, asset: Asset) => sum + (asset?.value || 0), 0)
+  const teamBTotal = safeTeamBAssets.reduce((sum: number, asset: Asset) => sum + (asset?.value || 0), 0)
 
   const handleEvaluate = () => {
     if (safeTeamAAssets.length === 0 && safeTeamBAssets.length === 0) {

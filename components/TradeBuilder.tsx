@@ -4,11 +4,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X } from "lucide-react"
-import { useTradeStore } from "@/lib/store"
+import { useTradeStore, type Asset } from "@/lib/store"
 import { safeArray } from "@/lib/safe"
 import { PlayerSearch } from "./PlayerSearch"
 import { ActiveSideControl } from "./ActiveSideControl"
-import type { Asset } from "@/lib/store"
 
 export function TradeBuilder() {
   const { 
@@ -23,8 +22,8 @@ export function TradeBuilder() {
   const safeTeamAAssets = safeArray(teamAAssets)
   const safeTeamBAssets = safeArray(teamBAssets)
 
-  const teamATotal = safeTeamAAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
-  const teamBTotal = safeTeamBAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
+  const teamATotal = safeTeamAAssets.reduce((sum: number, asset: Asset) => sum + (asset?.value || 0), 0)
+  const teamBTotal = safeTeamBAssets.reduce((sum: number, asset: Asset) => sum + (asset?.value || 0), 0)
 
   const handlePanelClick = (team: "A" | "B") => {
     setActiveSide(team)
@@ -32,11 +31,18 @@ export function TradeBuilder() {
 
   const handleAssetAdded = (asset: Asset, team: "A" | "B") => {
     // Asset was successfully added, no additional action needed
-    console.log(`Added ${asset?.label} to Team ${team}`)
+    console.log(`Added ${asset.label} to Team ${team}`)
   }
 
   return (
     <div className="space-y-8">
+      {/* Debug Badge (dev only) */}
+      {process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_DEBUG === "1" && (
+        <div className="fixed top-20 right-4 z-40 bg-background border border-border rounded-md px-3 py-1 text-xs font-mono">
+          A:{safeTeamAAssets.length} | B:{safeTeamBAssets.length}
+        </div>
+      )}
+
       {/* Active Side Control */}
       <div className="flex items-center gap-4">
         <span className="text-sm font-medium text-muted-foreground">Add to:</span>
@@ -73,38 +79,43 @@ export function TradeBuilder() {
             </div>
           ) : (
             <div className="space-y-3">
-              {safeTeamAAssets.map((asset: any) => (
+              {safeTeamAAssets.map((asset: Asset) => (
                 <div
-                  key={asset?.id || Math.random()}
+                  key={asset.id}
                   className="flex items-center justify-between p-3 bg-accent rounded-lg"
-                  data-testid={`asset-${asset?.id || 'unknown'}`}
+                  data-testid={`asset-${asset.id}`}
                 >
                   <div className="flex items-center space-x-3">
                     <div>
-                      <p className="font-medium text-foreground">{asset?.label || 'Unknown Asset'}</p>
+                      <p className="font-medium text-foreground">{asset.label}</p>
                       <div className="flex items-center space-x-2 mt-1">
-                        <Badge variant={asset?.type === "player" ? "default" : "secondary"} className="text-xs">
-                          {asset?.type === "player" ? (asset?.position || 'Unknown') : "Pick"}
+                        <Badge variant={asset.kind === "player" ? "default" : "secondary"} className="text-xs">
+                          {asset.kind === "player" ? (asset.meta?.position || 'Unknown') : "Pick"}
                         </Badge>
-                        {asset?.type === "player" && (
+                        {asset.kind === "player" && (
                           <>
                             <Badge variant="outline" className="text-xs">
-                              {asset?.team || 'Unknown'}
+                              {asset.meta?.team || 'Unknown'}
                             </Badge>
-                            <span className="text-xs text-muted-foreground">Age {asset?.age || 'Unknown'}</span>
+                            <span className="text-xs text-muted-foreground">Age {asset.meta?.age || 'Unknown'}</span>
                           </>
+                        )}
+                        {asset.kind === "pick" && (
+                          <Badge variant="outline" className="text-xs">
+                            {asset.meta?.year} Round {asset.meta?.round}
+                          </Badge>
                         )}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-muted-foreground">{asset?.baseValue || 0}</span>
+                    <span className="text-sm font-medium text-muted-foreground">{asset.value}</span>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => asset?.id && removeAssetFromTeam("A", asset.id)}
+                      onClick={() => removeAssetFromTeam("A", asset.id)}
                       className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
-                      data-testid={`remove-${asset?.id || 'unknown'}`}
+                      data-testid={`remove-${asset.id}`}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -143,38 +154,43 @@ export function TradeBuilder() {
             </div>
           ) : (
             <div className="space-y-3">
-              {safeTeamBAssets.map((asset: any) => (
+              {safeTeamBAssets.map((asset: Asset) => (
                 <div
-                  key={asset?.id || Math.random()}
+                  key={asset.id}
                   className="flex items-center justify-between p-3 bg-accent rounded-lg"
-                  data-testid={`asset-${asset?.id || 'unknown'}`}
+                  data-testid={`asset-${asset.id}`}
                 >
                   <div className="flex items-center space-x-3">
                     <div>
-                      <p className="font-medium text-foreground">{asset?.label || 'Unknown Asset'}</p>
+                      <p className="font-medium text-foreground">{asset.label}</p>
                       <div className="flex items-center space-x-2 mt-1">
-                        <Badge variant={asset?.type === "player" ? "default" : "secondary"} className="text-xs">
-                          {asset?.type === "player" ? (asset?.position || 'Unknown') : "Pick"}
+                        <Badge variant={asset.kind === "player" ? "default" : "secondary"} className="text-xs">
+                          {asset.kind === "player" ? (asset.meta?.position || 'Unknown') : "Pick"}
                         </Badge>
-                        {asset?.type === "player" && (
+                        {asset.kind === "player" && (
                           <>
                             <Badge variant="outline" className="text-xs">
-                              {asset?.team || 'Unknown'}
+                              {asset.meta?.team || 'Unknown'}
                             </Badge>
-                            <span className="text-xs text-muted-foreground">Age {asset?.age || 'Unknown'}</span>
+                            <span className="text-xs text-muted-foreground">Age {asset.meta?.age || 'Unknown'}</span>
                           </>
+                        )}
+                        {asset.kind === "pick" && (
+                          <Badge variant="outline" className="text-xs">
+                            {asset.meta?.year} Round {asset.meta?.round}
+                          </Badge>
                         )}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-muted-foreground">{asset?.baseValue || 0}</span>
+                    <span className="text-sm font-medium text-muted-foreground">{asset.value}</span>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => asset?.id && removeAssetFromTeam("B", asset.id)}
+                      onClick={() => removeAssetFromTeam("B", asset.id)}
                       className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
-                      data-testid={`remove-${asset?.id || 'unknown'}`}
+                      data-testid={`remove-${asset.id}`}
                     >
                       <X className="h-4 w-4" />
                     </Button>

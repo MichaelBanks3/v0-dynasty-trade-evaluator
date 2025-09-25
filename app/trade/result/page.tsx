@@ -1,6 +1,6 @@
 "use client"
 
-import { useTradeStore } from "@/lib/store"
+import { useTradeStore, type Asset } from "@/lib/store"
 import { TradeResultCard } from "@/components/TradeResultCard"
 import { safeArray } from "@/lib/safe"
 import { Button } from "@/components/ui/button"
@@ -49,8 +49,8 @@ function TradeResultPageContent() {
     setError(null)
 
     // Create a mock result for now since we're using the store data
-    const teamATotal = safeTeamAAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
-    const teamBTotal = safeTeamBAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
+    const teamATotal = safeTeamAAssets.reduce((sum: number, asset: any) => sum + (asset?.value || 0), 0)
+    const teamBTotal = safeTeamBAssets.reduce((sum: number, asset: any) => sum + (asset?.value || 0), 0)
     const difference = Math.abs(teamATotal - teamBTotal)
     
     let verdict = "FAIR"
@@ -58,21 +58,21 @@ function TradeResultPageContent() {
       verdict = teamATotal > teamBTotal ? "FAVORS_A" : "FAVORS_B"
     }
 
-    // Convert store assets to the format expected by TradeResultCard
+    // Convert normalized assets to the format expected by TradeResultCard
     const teamAPlayers = safeTeamAAssets.map((asset: any) => ({
-      id: parseInt(asset?.id || '0'),
-      name: asset?.label || 'Unknown Asset',
-      position: asset?.type === "player" ? (asset?.position || 'Unknown') : "PICK",
-      team: asset?.type === "player" ? (asset?.team || 'Unknown') : "DRAFT",
-      value: asset?.baseValue || 0
+      id: parseInt(asset.id) || 0,
+      name: asset.label,
+      position: asset.kind === "player" ? (asset.meta?.position || 'Unknown') : "PICK",
+      team: asset.kind === "player" ? (asset.meta?.team || 'Unknown') : "DRAFT",
+      value: asset.value
     }))
 
     const teamBPlayers = safeTeamBAssets.map((asset: any) => ({
-      id: parseInt(asset?.id || '0'),
-      name: asset?.label || 'Unknown Asset',
-      position: asset?.type === "player" ? (asset?.position || 'Unknown') : "PICK",
-      team: asset?.type === "player" ? (asset?.team || 'Unknown') : "DRAFT",
-      value: asset?.baseValue || 0
+      id: parseInt(asset.id) || 0,
+      name: asset.label,
+      position: asset.kind === "player" ? (asset.meta?.position || 'Unknown') : "PICK",
+      team: asset.kind === "player" ? (asset.meta?.team || 'Unknown') : "DRAFT",
+      value: asset.value
     }))
 
     const mockResult = {
