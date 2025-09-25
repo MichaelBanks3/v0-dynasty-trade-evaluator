@@ -17,10 +17,15 @@ export async function GET() {
     const trade = await prisma.trade.create({
       data: {
         userId: user.id,
+        payload: {
+          teamAAssets: ["1", "2"],
+          teamBAssets: ["3", "4"],
+          settings: { scoring: "PPR", superflex: false, tePremium: 1.0 }
+        },
         sideAPlayerIds: ["1", "2"], // Player IDs as strings
         sideBPlayerIds: ["3", "4"],
-        totalA: 58,
-        totalB: 52,
+        teamATotal: 58,
+        teamBTotal: 52,
         verdict: "FAVORS_A",
       },
     });

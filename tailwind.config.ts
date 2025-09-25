@@ -25,8 +25,6 @@ const config: Config = {
         muted: "#1A2430", // Muted elements
         text: "#E6F0FF", // Primary text
         subtext: "#9FB2C8", // Secondary text
-        accent: "#16DB65", // Neon green
-        "accent-contrast": "#07210F", // Dark green for contrast
         danger: "#FF3B3B", // Red for danger
         warn: "#FFC145", // Yellow for warnings
         info: "#3BA3FF", // Blue for info
