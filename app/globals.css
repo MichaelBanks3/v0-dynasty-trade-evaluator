@@ -1,124 +1,37 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+/* If you use tailwindcss-animate on v4, uncomment: */
+/* @import "tailwindcss-animate"; */
+
+/* Theme tokens (shadcn-style) */
+@theme {
+  --color-background: 0 0% 100%;
+  --color-foreground: 222 47% 11%;
+  --color-card: 0 0% 100%;
+  --color-muted: 210 40% 96.1%;
+}
 
 :root {
-  /* DraftKings-like dark theme tokens */
-  --bg: #0B0F14; /* Page background */
-  --surface: #11161C; /* Card background */
-  --muted: #1A2430; /* Muted elements */
-  --text: #E6F0FF; /* Primary text */
-  --subtext: #9FB2C8; /* Secondary text */
-  --accent: #16DB65; /* Neon green */
-  --accent-contrast: #07210F; /* Dark green for contrast */
-  --danger: #FF3B3B; /* Red for danger */
-  --warn: #FFC145; /* Yellow for warnings */
-  --info: #3BA3FF; /* Blue for info */
-  
-  /* Shadcn/ui compatibility */
-  --background: var(--bg);
-  --foreground: var(--text);
-  --card: var(--surface);
-  --card-foreground: var(--text);
-  --popover: var(--surface);
-  --popover-foreground: var(--text);
-  --primary: var(--accent);
-  --primary-foreground: var(--accent-contrast);
-  --secondary: var(--muted);
-  --secondary-foreground: var(--text);
-  --muted: var(--muted);
-  --muted-foreground: var(--subtext);
-  --accent: var(--accent);
-  --accent-foreground: var(--accent-contrast);
-  --destructive: var(--danger);
-  --destructive-foreground: var(--text);
-  --border: rgba(255, 255, 255, 0.06);
-  --input: rgba(255, 255, 255, 0.08);
-  --ring: var(--accent);
-  --chart-1: var(--accent);
-  --chart-2: var(--info);
-  --chart-3: var(--warn);
-  --chart-4: var(--danger);
-  --chart-5: var(--subtext);
-  --radius: 0.75rem;
+  --background: var(--color-background);
+  --foreground: var(--color-foreground);
+  --card: var(--color-card);
+  --muted: var(--color-muted);
+  /* Optional: keep a 'surface' token if code uses bg-surface */
+  --surface: var(--color-background);
 }
 
-@theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+.dark {
+  --background: 222 47% 11%;
+  --foreground: 0 0% 100%;
+  --card: 222 47% 13%;
+  --muted: 222 17% 18%;
+  --surface: 222 47% 11%;
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  
-  html {
-    /* Dark mode is applied via className="dark" in layout.tsx */
-  }
-  
-  body {
-    @apply bg-background text-foreground font-sans;
-    background-color: var(--bg);
-    color: var(--text);
-  }
-  
-  /* Card styling */
-  .card {
-    @apply bg-surface border border-border/50 rounded-xl shadow-md;
-    background-color: var(--surface);
-    border-color: rgba(255, 255, 255, 0.06);
-  }
-  
-  /* Button styling */
-  .btn-primary {
-    @apply bg-accent text-accent-contrast hover:shadow-glow focus:ring-2 focus:ring-accent/50;
-    background-color: var(--accent);
-    color: var(--accent-contrast);
-  }
-  
-  .btn-secondary {
-    @apply bg-muted text-foreground border border-border hover:bg-muted/80;
-    background-color: var(--muted);
-    color: var(--text);
-  }
-  
-  /* Progress bars */
-  .progress-bar {
-    @apply overflow-hidden rounded-lg bg-muted/20;
-    background-color: rgba(255, 255, 255, 0.06);
-  }
-  
-  /* Focus states */
-  .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-accent/50 focus:ring-offset-2 focus:ring-offset-background;
-  }
-}
+/* Utility mappings for tokens */
+.bg-background { background-color: hsl(var(--background)); }
+.text-foreground { color: hsl(var(--foreground)); }
+.bg-card { background-color: hsl(var(--card)); }
+.bg-muted { background-color: hsl(var(--muted)); }
+
+/* Back-compat: if code uses bg-surface, keep it working */
+.bg-surface { background-color: hsl(var(--surface)); }
