@@ -204,9 +204,17 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
                         return (
                           <div
                             key={asset.id}
-                            className="flex items-center justify-between p-2 hover:bg-accent rounded cursor-pointer"
+                            className="flex items-center justify-between p-2 hover:bg-accent rounded cursor-pointer transition-colors"
                             data-testid={`search-result-${asset.id}`}
                             onKeyDown={(e) => handleKeyDown(e, asset)}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              console.log("[ADD] Player row clicked")
+                              if (!isAlreadyAdded) {
+                                handleAdd(asset, activeSide)
+                              }
+                            }}
                             tabIndex={0}
                           >
                             <div className="flex items-center space-x-3 flex-1">
@@ -248,7 +256,7 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
                                     onClick={(e) => {
                                       e.preventDefault()
                                       e.stopPropagation()
-                                      console.log("[ADD] Primary button clicked")
+                                      console.log("[ADD] Plus button clicked")
                                       handleAdd(asset, activeSide)
                                     }}
                                     data-testid={`add-${asset.id}-${activeSide.toLowerCase()}`}
