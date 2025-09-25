@@ -22,7 +22,9 @@ export default function RootLayout({
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <ClerkProvider>
           <AppNav />
-          {children}
+          <main className="pt-16">
+            {children}
+          </main>
         </ClerkProvider>
         <Analytics />
       </body>

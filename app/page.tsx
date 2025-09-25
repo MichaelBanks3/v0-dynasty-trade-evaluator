@@ -1,44 +1,11 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { SignedIn, SignedOut, UserButton, SignOutButton } from "@clerk/nextjs"
 import { TrendingUp, Users, BarChart3 } from "lucide-react"
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Link href="/" className="text-xl font-bold text-foreground">
-                Dynasty Trade Evaluator
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
-                Dashboard
-              </Link>
-              <Link href="/trade/new" className="text-muted-foreground hover:text-foreground">
-                Create Trade
-              </Link>
-              <SignedOut>
-                <Link href="/sign-in" className="text-muted-foreground hover:text-foreground" data-testid="auth-signin-link">
-                  Sign in
-                </Link>
-              </SignedOut>
-              <SignedIn>
-                <UserButton appearance={{ elements: { userButtonTrigger: "h-8 w-8" } }} data-testid="auth-user-button" />
-                <SignOutButton>
-                  <button className="text-muted-foreground hover:text-foreground" data-testid="auth-signout-button">Sign out</button>
-                </SignOutButton>
-              </SignedIn>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center">

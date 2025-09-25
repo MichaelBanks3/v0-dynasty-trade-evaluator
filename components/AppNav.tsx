@@ -31,7 +31,7 @@ export function AppNav() {
                 href="/trade"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md px-3 py-2 hover:bg-accent"
               >
-                Trade
+                Create Trade
               </Link>
               <Link
                 href="/dashboard"
@@ -71,7 +71,7 @@ export function AppNav() {
             href="/trade"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors block px-3 py-2 rounded-md hover:bg-accent"
           >
-            Trade
+            Create Trade
           </Link>
           <Link
             href="/dashboard"

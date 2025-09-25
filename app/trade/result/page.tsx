@@ -1,320 +1,159 @@
 "use client"
 
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { WinNowFutureChart } from "@/components/WinNowFutureChart"
 import { useTradeStore } from "@/lib/store"
-import { ArrowLeft, Edit, Save, TrendingUp, TrendingDown, Minus } from "lucide-react"
-import { SignedIn, SignedOut, UserButton, SignOutButton } from "@clerk/nextjs"
-import { AuthEnvBanner } from "@/components/AuthEnvBanner"
+import { TradeResultCard } from "@/components/TradeResultCard"
+import { Button } from "@/components/ui/button"
+import { AlertCircle } from "lucide-react"
 import { useEffect, useState } from "react"
 
 export default function TradeResultPage() {
-  const router = useRouter()
-  const { teamAAssets, teamBAssets, leagueSettings, getTeamTotal } = useTradeStore()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Redirect if no trade data
-  useEffect(() => {
-    if (mounted && teamAAssets.length === 0 && teamBAssets.length === 0) {
-      router.push("/trade/new")
-    }
-  }, [mounted, teamAAssets.length, teamBAssets.length, router])
-
   if (!mounted) {
-    return null // Prevent hydration mismatch
+    return (
+      <div className="min-h-screen bg-background p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  const teamATotal = getTeamTotal("A")
-  const teamBTotal = getTeamTotal("B")
-  const difference = Math.abs(teamATotal - teamBTotal)
-  const percentageDiff = teamATotal > 0 && teamBTotal > 0 ? (difference / Math.max(teamATotal, teamBTotal)) * 100 : 0
+  return <TradeResultPageContent />
+}
 
-  const getFairnessResult = () => {
-    if (percentageDiff < 5)
-      return { text: "Even", variant: "secondary" as const, icon: Minus, color: "text-muted-foreground" }
-    if (percentageDiff < 15) {
-      return {
-        text: teamATotal > teamBTotal ? "Slightly Favors Team A" : "Slightly Favors Team B",
-        variant: "outline" as const,
-        icon: teamATotal > teamBTotal ? TrendingUp : TrendingDown,
-        color: teamATotal > teamBTotal ? "text-green-600" : "text-blue-600",
-      }
+function TradeResultPageContent() {
+  const { teamAAssets, teamBAssets } = useTradeStore()
+  const [result, setResult] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if ((teamAAssets?.length || 0) === 0 && (teamBAssets?.length || 0) === 0) {
+      return
     }
-    return {
-      text: teamATotal > teamBTotal ? "Leans Team A" : "Leans Team B",
-      variant: "default" as const,
-      icon: teamATotal > teamBTotal ? TrendingUp : TrendingDown,
-      color: teamATotal > teamBTotal ? "text-green-600" : "text-blue-600",
+
+    setLoading(true)
+    setError(null)
+
+    // Create a mock result for now since we're using the store data
+    const teamATotal = teamAAssets?.reduce((sum: number, asset: any) => sum + asset.baseValue, 0) || 0
+    const teamBTotal = teamBAssets?.reduce((sum: number, asset: any) => sum + asset.baseValue, 0) || 0
+    const difference = Math.abs(teamATotal - teamBTotal)
+    
+    let verdict = "FAIR"
+    if (difference > 50) {
+      verdict = teamATotal > teamBTotal ? "FAVORS_A" : "FAVORS_B"
     }
+
+    // Convert store assets to the format expected by TradeResultCard
+    const teamAPlayers = (teamAAssets || []).map((asset: any) => ({
+      id: parseInt(asset.id),
+      name: asset.label,
+      position: asset.type === "player" ? asset.position : "PICK",
+      team: asset.type === "player" ? asset.team : "DRAFT",
+      value: asset.baseValue
+    }))
+
+    const teamBPlayers = (teamBAssets || []).map((asset: any) => ({
+      id: parseInt(asset.id),
+      name: asset.label,
+      position: asset.type === "player" ? asset.position : "PICK",
+      team: asset.type === "player" ? asset.team : "DRAFT",
+      value: asset.baseValue
+    }))
+
+    const mockResult = {
+      totalA: teamATotal,
+      totalB: teamBTotal,
+      verdict: verdict,
+      teamAPlayers: teamAPlayers,
+      teamBPlayers: teamBPlayers,
+      saved: false
+    }
+
+    setResult(mockResult)
+    setLoading(false)
+  }, [teamAAssets, teamBAssets])
+
+  if ((teamAAssets?.length || 0) === 0 && (teamBAssets?.length || 0) === 0) {
+    return (
+      <div className="min-h-screen bg-background p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center py-16">
+            <AlertCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-foreground mb-2">No Trade Data</h1>
+            <p className="text-muted-foreground mb-6">
+              It looks like you haven't created a trade yet. Go back to create your first trade evaluation.
+            </p>
+            <Button asChild>
+              <a href="/trade">Create Trade</a>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  const fairness = getFairnessResult()
-  const IconComponent = fairness.icon
-
-  // Calculate win-now vs future scores
-  const calculateWinNowFutureScores = () => {
-    let winNowScore = 0
-    let futureScore = 0
-
-    const allAssets = [...teamAAssets, ...teamBAssets]
-
-    allAssets.forEach((asset) => {
-      if (asset.type === "pick") {
-        futureScore += asset.baseValue
-      } else {
-        const player = asset as any
-        if (player.age <= 23) {
-          futureScore += asset.baseValue * 0.8 // Young players lean future
-          winNowScore += asset.baseValue * 0.2
-        } else if (player.age <= 26) {
-          winNowScore += asset.baseValue * 0.7 // Prime players lean win-now
-          futureScore += asset.baseValue * 0.3
-        } else if (player.age <= 29) {
-          winNowScore += asset.baseValue * 0.9 // Peak players heavily win-now
-          futureScore += asset.baseValue * 0.1
-        } else {
-          winNowScore += asset.baseValue // Veterans are pure win-now
-        }
-      }
-    })
-
-    return { winNowScore, futureScore }
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Evaluating your trade...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  const { winNowScore, futureScore } = calculateWinNowFutureScores()
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center py-16">
+            <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-foreground mb-2">Evaluation Error</h1>
+            <p className="text-muted-foreground mb-6">{error}</p>
+            <Button asChild>
+              <a href="/trade">Try Again</a>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!result) {
+    return (
+      <div className="min-h-screen bg-background p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center py-16">
+            <AlertCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-foreground mb-2">No Results</h1>
+            <p className="text-muted-foreground mb-6">Unable to evaluate the trade.</p>
+            <Button asChild>
+              <a href="/trade">Try Again</a>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Link href="/" className="text-xl font-bold text-foreground">
-                Dynasty Trade Evaluator
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
-                Dashboard
-              </Link>
-              <Link href="/trade/new" className="text-muted-foreground hover:text-foreground">
-                Create Trade
-              </Link>
-              <SignedOut>
-                <Link href="/sign-in" className="text-muted-foreground hover:text-foreground" data-testid="auth-signin-link">
-                  Sign in
-                </Link>
-              </SignedOut>
-              <SignedIn>
-                <UserButton data-testid="auth-user-button" />
-                <SignOutButton>
-                  <button className="text-muted-foreground hover:text-foreground" data-testid="auth-signout-button">Sign out</button>
-                </SignOutButton>
-              </SignedIn>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Results Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <AuthEnvBanner />
-        {/* Header */}
-        <div className="flex items-center space-x-4 mb-8">
-          <Button variant="ghost" onClick={() => router.back()} className="p-2">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Trade Evaluation</h1>
-            <p className="text-muted-foreground mt-2">Analysis of your dynasty trade</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Summary Card */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-xl">Trade Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {/* Fairness Meter */}
-                <div className="text-center">
-                  <div className="flex items-center justify-center space-x-2 mb-4">
-                    <IconComponent className={`h-6 w-6 ${fairness.color}`} />
-                    <Badge variant={fairness.variant} className="text-lg px-4 py-2">
-                      {fairness.text}
-                    </Badge>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {percentageDiff < 5
-                      ? "This trade is very balanced with minimal value difference."
-                      : percentageDiff < 15
-                        ? "This trade has a slight value imbalance but is still reasonable."
-                        : "This trade has a significant value imbalance."}
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Team Totals */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <h3 className="font-semibold text-foreground mb-2">Team A</h3>
-                    <div className="text-3xl font-bold text-foreground">{Math.round(teamATotal)}</div>
-                    <div className="text-sm text-muted-foreground">Total Value</div>
-                  </div>
-                  <div className="text-center">
-                    <h3 className="font-semibold text-foreground mb-2">Team B</h3>
-                    <div className="text-3xl font-bold text-foreground">{Math.round(teamBTotal)}</div>
-                    <div className="text-sm text-muted-foreground">Total Value</div>
-                  </div>
-                </div>
-
-                {/* League Settings Applied */}
-                {(leagueSettings.superflex || leagueSettings.tePremium) && (
-                  <>
-                    <Separator />
-                    <div>
-                      <h4 className="font-medium text-foreground mb-2">League Settings Applied</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {leagueSettings.superflex && <Badge variant="outline">Superflex (+20% QB value)</Badge>}
-                        {leagueSettings.tePremium && <Badge variant="outline">TE Premium (+15% TE value)</Badge>}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Win-Now vs Future Chart */}
-          <div className="lg:col-span-1">
-            <WinNowFutureChart winNowScore={winNowScore} futureScore={futureScore} />
-          </div>
-
-          {/* Transparent Breakdown */}
-          <Card className="lg:col-span-3">
-            <CardHeader>
-              <CardTitle className="text-xl">Transparent Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Team A Assets */}
-                <div>
-                  <h3 className="font-semibold text-foreground mb-4 flex items-center justify-between">
-                    Team A Assets
-                    <Badge variant="outline">Subtotal: {Math.round(teamATotal)}</Badge>
-                  </h3>
-                  <div className="space-y-3">
-                    {teamAAssets.map((asset) => {
-                      let adjustedValue = asset.baseValue
-                      if ("position" in asset) {
-                        if (leagueSettings.superflex && asset.position === "QB") {
-                          adjustedValue *= 1.2
-                        }
-                        if (leagueSettings.tePremium && asset.position === "TE") {
-                          adjustedValue *= 1.15
-                        }
-                      }
-
-                      return (
-                        <div key={asset.id} className="flex items-center justify-between p-3 bg-accent rounded-lg">
-                          <div>
-                            <p className="font-medium text-foreground">{asset.label}</p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <Badge variant={asset.type === "player" ? "default" : "secondary"} className="text-xs">
-                                {asset.type === "player" ? (asset as any).position : "Pick"}
-                              </Badge>
-                              {asset.type === "player" && (
-                                <span className="text-xs text-muted-foreground">Age {(asset as any).age}</span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-medium text-foreground">{Math.round(adjustedValue)}</div>
-                            {adjustedValue !== asset.baseValue && (
-                              <div className="text-xs text-muted-foreground">Base: {asset.baseValue}</div>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {/* Team B Assets */}
-                <div>
-                  <h3 className="font-semibold text-foreground mb-4 flex items-center justify-between">
-                    Team B Assets
-                    <Badge variant="outline">Subtotal: {Math.round(teamBTotal)}</Badge>
-                  </h3>
-                  <div className="space-y-3">
-                    {teamBAssets.map((asset) => {
-                      let adjustedValue = asset.baseValue
-                      if ("position" in asset) {
-                        if (leagueSettings.superflex && asset.position === "QB") {
-                          adjustedValue *= 1.2
-                        }
-                        if (leagueSettings.tePremium && asset.position === "TE") {
-                          adjustedValue *= 1.15
-                        }
-                      }
-
-                      return (
-                        <div key={asset.id} className="flex items-center justify-between p-3 bg-accent rounded-lg">
-                          <div>
-                            <p className="font-medium text-foreground">{asset.label}</p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <Badge variant={asset.type === "player" ? "default" : "secondary"} className="text-xs">
-                                {asset.type === "player" ? (asset as any).position : "Pick"}
-                              </Badge>
-                              {asset.type === "player" && (
-                                <span className="text-xs text-muted-foreground">Age {(asset as any).age}</span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-medium text-foreground">{Math.round(adjustedValue)}</div>
-                            {adjustedValue !== asset.baseValue && (
-                              <div className="text-xs text-muted-foreground">Base: {asset.baseValue}</div>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Action Buttons */}
-          <div className="lg:col-span-3">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/trade/new" className="flex-1">
-                <Button variant="outline" size="lg" className="w-full bg-transparent">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Trade
-                </Button>
-              </Link>
-              <Button size="lg" className="flex-1" disabled>
-                <Save className="h-4 w-4 mr-2" />
-                Save Trade (Coming Soon)
-              </Button>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-background p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8">Trade Evaluation Results</h1>
+        <TradeResultCard result={result} />
       </div>
     </div>
   )
