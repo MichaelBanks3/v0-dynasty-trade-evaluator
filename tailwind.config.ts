@@ -34,35 +34,35 @@ const config: Config = {
         border: "rgba(255, 255, 255, 0.06)",
         input: "rgba(255, 255, 255, 0.08)",
         ring: "#16DB65",
-        background: "var(--bg)",
-        foreground: "var(--text)",
+        background: "#0B0F14", // --bg
+        foreground: "#E6F0FF", // --text
         card: {
-          DEFAULT: "var(--surface)",
-          foreground: "var(--text)",
+          DEFAULT: "#11161C", // --surface
+          foreground: "#E6F0FF", // --text
         },
         popover: {
-          DEFAULT: "var(--surface)",
-          foreground: "var(--text)",
+          DEFAULT: "#11161C", // --surface
+          foreground: "#E6F0FF", // --text
         },
         primary: {
-          DEFAULT: "var(--accent)",
-          foreground: "var(--accent-contrast)",
+          DEFAULT: "#16DB65", // --accent
+          foreground: "#07210F", // --accent-contrast
         },
         secondary: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--text)",
+          DEFAULT: "#1A2430", // --muted
+          foreground: "#E6F0FF", // --text
         },
         muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--subtext)",
+          DEFAULT: "#1A2430", // --muted
+          foreground: "#9FB2C8", // --subtext
         },
         accent: {
-          DEFAULT: "var(--accent)",
-          foreground: "var(--accent-contrast)",
+          DEFAULT: "#16DB65", // --accent
+          foreground: "#07210F", // --accent-contrast
         },
         destructive: {
-          DEFAULT: "var(--danger)",
-          foreground: "var(--text)",
+          DEFAULT: "#FF3B3B", // --danger
+          foreground: "#E6F0FF", // --text
         },
       },
       borderRadius: {
