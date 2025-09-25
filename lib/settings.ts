@@ -170,7 +170,7 @@ export function formatSettingsForDisplay(settings: LeagueSettings): string {
   const parts = []
   
   // Scoring
-  parts.push(settings.scoring)
+  parts.push(settings.scoring || 'Standard')
   
   // Superflex
   if (settings.superflex) {
