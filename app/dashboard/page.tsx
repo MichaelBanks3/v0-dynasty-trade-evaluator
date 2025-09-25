@@ -13,9 +13,8 @@ interface Trade {
   totalA: number
   totalB: number
   verdict: string
-  diff: number
-  teamAIds: number[]
-  teamBIds: number[]
+  sideAPlayerIds: string[]
+  sideBPlayerIds: string[]
 }
 
 export default function DashboardPage() {
@@ -36,7 +35,7 @@ export default function DashboardPage() {
   }, [isSignedIn])
 
   if (!isSignedIn) {
-    return (
+  return (
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
@@ -46,7 +45,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+        </div>
     )
   }
 
@@ -82,7 +81,7 @@ export default function DashboardPage() {
                     data-testid="back-home-button"
                   >
                     Back to Home
-                  </Button>
+                </Button>
                 </Link>
               </div>
             </CardContent>
@@ -91,12 +90,12 @@ export default function DashboardPage() {
           <div className="space-y-4" data-testid="my-trades">
             {trades.map(trade => (
               <Card key={trade.id}>
-                <CardHeader>
+            <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">
                       Trade #{trades.indexOf(trade) + 1}
                     </CardTitle>
-                    <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2">
                       <Badge variant="outline">
                         {new Date(trade.createdAt).toLocaleDateString()}
                       </Badge>
@@ -115,23 +114,23 @@ export default function DashboardPage() {
                     <div>
                       <h4 className="font-medium">Team A: {trade.totalA} points</h4>
                       <p className="text-sm text-muted-foreground">
-                        {trade.teamAIds.length} players
+                        {trade.sideAPlayerIds.length} players
                       </p>
                     </div>
                     <div>
                       <h4 className="font-medium">Team B: {trade.totalB} points</h4>
                       <p className="text-sm text-muted-foreground">
-                        {trade.teamBIds.length} players
+                        {trade.sideBPlayerIds.length} players
                       </p>
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Difference: {trade.diff} points
+                    Difference: {Math.abs(trade.totalA - trade.totalB)} points
                   </p>
-                </CardContent>
-              </Card>
+            </CardContent>
+          </Card>
             ))}
-          </div>
+        </div>
         )}
       </div>
     </div>

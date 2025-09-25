@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   try {
     // Ensure a test user exists
@@ -14,13 +17,11 @@ export async function GET() {
     const trade = await prisma.trade.create({
       data: {
         userId: user.id,
-        // Just pass plain arrays for JSON columns
-        teamAIds: ["Amon-Ra St. Brown"],
-        teamBIds: ["Garrett Wilson"],
+        sideAPlayerIds: ["1", "2"], // Player IDs as strings
+        sideBPlayerIds: ["3", "4"],
         totalA: 58,
         totalB: 52,
         verdict: "FAVORS_A",
-        diff: 58 - 52,
       },
     });
 

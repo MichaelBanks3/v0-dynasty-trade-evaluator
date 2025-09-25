@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
+
 const FAIRNESS_THRESHOLD = 50
 
 export async function POST(request: NextRequest) {

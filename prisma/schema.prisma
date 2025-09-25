@@ -33,17 +33,16 @@ model User {
 }
 
 model Trade {
-  id         String   @id @default(uuid())
-  userId     String?
-  createdAt  DateTime @default(now())
-  teamAIds   Json
-  teamBIds   Json
-  totalA     Int
-  totalB     Int
-  verdict    String
-  diff       Int
+  id               String   @id @default(cuid())
+  userId           String
+  createdAt        DateTime @default(now())
+  sideAPlayerIds   String[]
+  sideBPlayerIds   String[]
+  totalA           Int
+  totalB           Int
+  verdict          String
 
-  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
