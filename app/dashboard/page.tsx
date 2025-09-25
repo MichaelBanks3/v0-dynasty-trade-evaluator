@@ -56,7 +56,20 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">My Trades</h1>
+        {/* Dashboard Exit Controls */}
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">My Trades</h1>
+          <div className="flex items-center space-x-4">
+            <Link href="/trade">
+              <Button data-testid="new-trade-button">
+                New Trade
+              </Button>
+            </Link>
+            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              ← Back to Home
+            </Link>
+          </div>
+        </div>
         
         {loading ? (
           <Card>
