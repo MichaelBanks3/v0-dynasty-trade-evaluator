@@ -82,7 +82,7 @@
   }
   
   html {
-    @apply dark; /* Force dark mode by default */
+    /* Dark mode is applied via className="dark" in layout.tsx */
   }
   
   body {
