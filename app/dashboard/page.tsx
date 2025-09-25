@@ -24,9 +24,6 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (isSignedIn) {
-      // Ensure user exists in database (fire-and-forget)
-      fetch('/api/users/ensure', { method: 'POST' }).catch(() => {})
-      
       // Fetch trades
       fetch('/api/trades/my-trades')
         .then(res => res.json())
