@@ -317,9 +317,9 @@ export function AdvisorPanel({ teamAAssets, teamBAssets, settings, className }: 
           <h4 className="font-semibold mb-2">Timeline Fit</h4>
           <div className="p-3 bg-muted rounded">
             {deltas.nowIndex > deltas.futureIndex ? (
-              <span className="text-green-600">✓ Aligned with Contend timeline (Now +{deltas.nowIndex} > Future {deltas.futureIndex})</span>
+              <span className="text-green-600">✓ Aligned with Contend timeline (Now +{deltas.nowIndex} {" > "} Future {deltas.futureIndex})</span>
             ) : deltas.futureIndex > deltas.nowIndex ? (
-              <span className="text-blue-600">✓ Aligned with Rebuild timeline (Future +{deltas.futureIndex} > Now {deltas.nowIndex})</span>
+              <span className="text-blue-600">✓ Aligned with Rebuild timeline (Future +{deltas.futureIndex} {" > "} Now {deltas.nowIndex})</span>
             ) : (
               <span className="text-gray-600">Balanced impact on both timelines</span>
             )}
