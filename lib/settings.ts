@@ -166,33 +166,34 @@ export function calculateSettingsAdjustments(
 }
 
 // Format settings for display
-export function formatSettingsForDisplay(settings: LeagueSettings): string {
+export function formatSettingsForDisplay(settings: LeagueSettings | null | undefined): string {
   const parts = []
   
   // Scoring
-  parts.push(settings.scoring || 'Standard')
+  parts.push(settings?.scoring ?? 'Standard')
   
   // Superflex
-  if (settings.superflex) {
+  if (settings?.superflex) {
     parts.push('SF')
   }
   
   // TE Premium
-  if (settings.tePremium) {
-    parts.push(`TEP ${settings.tePremiumMultiplier}`)
+  if (settings?.tePremium) {
+    parts.push(`TEP ${settings.tePremiumMultiplier ?? 1.5}`)
   }
   
   // League size
-  parts.push(`${settings.leagueSize}-team`)
+  parts.push(`${settings?.leagueSize ?? 12}-team`)
   
   // Starters
   const starterParts = []
-  if (settings.starters.QB > 0) starterParts.push(`${settings.starters.QB}QB`)
-  if (settings.starters.RB > 0) starterParts.push(`${settings.starters.RB}RB`)
-  if (settings.starters.WR > 0) starterParts.push(`${settings.starters.WR}WR`)
-  if (settings.starters.TE > 0) starterParts.push(`${settings.starters.TE}TE`)
-  if (settings.starters.FLEX > 0) starterParts.push(`${settings.starters.FLEX}FLEX`)
-  if (settings.starters.SUPERFLEX > 0) starterParts.push(`${settings.starters.SUPERFLEX}SF`)
+  const starters = settings?.starters
+  if (starters?.QB > 0) starterParts.push(`${starters.QB}QB`)
+  if (starters?.RB > 0) starterParts.push(`${starters.RB}RB`)
+  if (starters?.WR > 0) starterParts.push(`${starters.WR}WR`)
+  if (starters?.TE > 0) starterParts.push(`${starters.TE}TE`)
+  if (starters?.FLEX > 0) starterParts.push(`${starters.FLEX}FLEX`)
+  if (starters?.SUPERFLEX > 0) starterParts.push(`${starters.SUPERFLEX}SF`)
   
   if (starterParts.length > 0) {
     parts.push(starterParts.join('/'))
