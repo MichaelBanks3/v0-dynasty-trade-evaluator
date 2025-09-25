@@ -74,20 +74,20 @@ export default function DashboardPage() {
   const getVerdictColor = (verdict: string) => {
     switch (verdict) {
       case 'FAVORS_A':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
       case 'FAVORS_B':
-        return 'bg-purple-100 text-purple-800'
+        return 'bg-purple-500/20 text-purple-400 border-purple-500/30'
       case 'FAIR':
-        return 'bg-green-100 text-green-800'
+        return 'bg-green-500/20 text-green-400 border-green-500/30'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-500/20 text-gray-400 border-gray-500/30'
     }
   }
 
   const calculateCompositeDelta = (totalA: number, totalB: number) => {
     const diff = Math.abs(totalA - totalB)
     const max = Math.max(totalA, totalB)
-    return Math.round((diff / max) * 100)
+    return max > 0 ? Math.round((diff / max) * 100) : 0
   }
 
   const filteredTrades = trades.filter(trade => {
@@ -101,12 +101,10 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading your trades...</p>
-          </div>
+      <div className="space-y-6">
+        <div className="text-center py-16">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+          <p className="text-subtext">Loading your trades...</p>
         </div>
       </div>
     )
@@ -114,146 +112,156 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center py-16">
-            <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-foreground mb-2">Error Loading Trades</h1>
-            <p className="text-muted-foreground mb-6">{error}</p>
-            <Button onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
-          </div>
+      <div className="space-y-6">
+        <div className="text-center py-16">
+          <AlertCircle className="h-16 w-16 text-danger mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-text mb-2">Error Loading Trades</h1>
+          <p className="text-subtext mb-6">{error}</p>
+          <Button onClick={() => window.location.reload()} className="bg-accent text-accent-contrast hover:bg-accent/90">
+            Try Again
+          </Button>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Trade History</h1>
-            <p className="text-muted-foreground mt-2">
-              {trades.length} saved trades
-            </p>
-          </div>
-          <Button asChild>
-            <a href="/trade">
-              <Plus className="h-4 w-4 mr-2" />
-              New Trade
-            </a>
-          </Button>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-text">Trade History</h1>
+          <p className="text-subtext mt-2">
+            {trades.length} saved trades
+          </p>
         </div>
+        <Button asChild className="bg-accent text-accent-contrast hover:bg-accent/90">
+          <a href="/trade">
+            <Plus className="h-4 w-4 mr-2" />
+            New Trade
+          </a>
+        </Button>
+      </div>
 
-        {trades.length === 0 ? (
-          /* Empty State */
-          <Card>
-            <CardContent className="text-center py-16">
-              <div className="max-w-md mx-auto">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Plus className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">No trades yet</h3>
-                <p className="text-muted-foreground mb-6">
-                  Create your first trade evaluation to get started
-                </p>
-                <Button asChild>
-                  <a href="/trade">Create Your First Trade</a>
-                </Button>
+      {trades.length === 0 ? (
+        /* Empty State */
+        <Card>
+          <CardContent className="text-center py-16">
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                <Plus className="h-8 w-8 text-subtext" />
               </div>
+              <h3 className="text-xl font-semibold mb-2 text-text">No trades yet</h3>
+              <p className="text-subtext mb-6">
+                Create your first trade evaluation to get started
+              </p>
+              <Button asChild className="bg-accent text-accent-contrast hover:bg-accent/90">
+                <a href="/trade">Create Your First Trade</a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Filters */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Input
+                placeholder="Search trades..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-surface border-border"
+              />
+            </div>
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger className="w-48 bg-surface border-border">
+                <SelectValue placeholder="Filter by verdict" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Trades</SelectItem>
+                <SelectItem value="FAVORS_A">Favors Team A</SelectItem>
+                <SelectItem value="FAVORS_B">Favors Team B</SelectItem>
+                <SelectItem value="FAIR">Fair Trades</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Trades Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-text">Recent Trades</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-subtext">Date</TableHead>
+                    <TableHead className="text-subtext">Verdict</TableHead>
+                    <TableHead className="text-subtext">Team A Total</TableHead>
+                    <TableHead className="text-subtext">Team B Total</TableHead>
+                    <TableHead className="text-subtext">Delta</TableHead>
+                    <TableHead className="text-subtext">Settings</TableHead>
+                    <TableHead className="text-subtext">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredTrades.map((trade) => (
+                    <TableRow key={trade.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-subtext" />
+                          {new Date(trade.createdAt).toLocaleDateString()}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getVerdictIcon(trade.verdict)}
+                          <Badge className={getVerdictColor(trade.verdict)}>
+                            {trade.verdict.replace('_', ' ')}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono text-text">
+                          {Number(trade.totalA || 0).toLocaleString()}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono text-text">
+                          {Number(trade.totalB || 0).toLocaleString()}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono text-text">
+                          {calculateCompositeDelta(trade.totalA, trade.totalB)}%
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="font-mono text-xs bg-muted/50 border-border">
+                          {formatSettingsForDisplay(trade.settings)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                          className="text-subtext hover:text-text"
+                        >
+                          <a href={`/t/${trade.slug}`}>
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            View
+                          </a>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
-        ) : (
-          <>
-            {/* Filters */}
-            <div className="flex gap-4 mb-6">
-              <div className="flex-1">
-                <Input
-                  placeholder="Search trades..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <Select value={filter} onValueChange={setFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Filter by verdict" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Trades</SelectItem>
-                  <SelectItem value="FAVORS_A">Favors Team A</SelectItem>
-                  <SelectItem value="FAVORS_B">Favors Team B</SelectItem>
-                  <SelectItem value="FAIR">Fair Trades</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Trades Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Trades</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Verdict</TableHead>
-                      <TableHead>Composite Delta</TableHead>
-                      <TableHead>Settings</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredTrades.map((trade) => (
-                      <TableRow key={trade.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            {new Date(trade.createdAt).toLocaleDateString()}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {getVerdictIcon(trade.verdict)}
-                            <Badge className={getVerdictColor(trade.verdict)}>
-                              {trade.verdict.replace('_', ' ')}
-                            </Badge>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-mono">
-                            {calculateCompositeDelta(trade.totalA, trade.totalB)}%
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="font-mono text-xs">
-                            {formatSettingsForDisplay(trade.settings)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            asChild
-                          >
-                            <a href={`/t/${trade.slug}`}>
-                              <ExternalLink className="h-4 w-4 mr-2" />
-                              View
-                            </a>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </>
-        )}
-      </div>
+        </>
+      )}
     </div>
   )
 }

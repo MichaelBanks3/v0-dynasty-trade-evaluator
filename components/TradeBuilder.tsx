@@ -13,7 +13,11 @@ import { ActiveSideControl } from "./ActiveSideControl"
 import { trackEvent, generatePayloadHash } from "@/lib/analytics"
 import { useEffect, useRef } from "react"
 
-export function TradeBuilder() {
+interface TradeBuilderProps {
+  searchInputRef?: React.RefObject<HTMLInputElement>
+}
+
+export function TradeBuilder({ searchInputRef }: TradeBuilderProps) {
   const { 
     teamAAssets, 
     teamBAssets, 
@@ -25,7 +29,7 @@ export function TradeBuilder() {
     updateLeagueSettings
   } = useTradeStore()
 
-  const searchRef = useRef<HTMLInputElement>(null)
+  const searchRef = searchInputRef || useRef<HTMLInputElement>(null)
 
   // Safely get arrays
   const safeTeamAAssets = safeArray(teamAAssets)

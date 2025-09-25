@@ -32,14 +32,121 @@ export function OnboardingPanel({ onDismiss, onExampleTrade }: OnboardingPanelPr
     onDismiss?.()
   }
 
-  const handleExampleTrade = (trade: ExampleTrade) => {
-    // Load example trade into the builder
-    setTeamAAssets(trade.teamA.map(id => ({ id, kind: 'player', label: id, value: 0 })))
-    setTeamBAssets(trade.teamB.map(id => ({ id, kind: 'player', label: id, value: 0 })))
-    setLeagueSettings(trade.settings)
-    
-    onExampleTrade?.(trade)
-    handleDismiss()
+  const handleExampleTrade = async (trade: ExampleTrade) => {
+    try {
+      // Fetch actual player/pick data for the example trade
+      const teamAAssets = await Promise.all(
+        trade.teamA.map(async (id) => {
+          if (id.startsWith('pick:')) {
+            // Handle pick format: pick:2025:1
+            const [, year, round] = id.split(':')
+            return {
+              id,
+              kind: 'pick' as const,
+              label: `${year} Round ${round}`,
+              value: 0,
+              meta: {
+                year: parseInt(year),
+                round: parseInt(round)
+              }
+            }
+          } else {
+            // Handle player ID - fetch from API
+            try {
+              const response = await fetch(`/api/players/${id}`)
+              if (response.ok) {
+                const player = await response.json()
+                return {
+                  id,
+                  kind: 'player' as const,
+                  label: player.name || `Player ${id}`,
+                  value: 0,
+                  meta: {
+                    position: player.position,
+                    team: player.team,
+                    age: player.age
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('Error fetching player:', error)
+            }
+            // Fallback for failed fetch
+            return {
+              id,
+              kind: 'player' as const,
+              label: `Player ${id}`,
+              value: 0,
+              meta: {}
+            }
+          }
+        })
+      )
+
+      const teamBAssets = await Promise.all(
+        trade.teamB.map(async (id) => {
+          if (id.startsWith('pick:')) {
+            // Handle pick format: pick:2025:1
+            const [, year, round] = id.split(':')
+            return {
+              id,
+              kind: 'pick' as const,
+              label: `${year} Round ${round}`,
+              value: 0,
+              meta: {
+                year: parseInt(year),
+                round: parseInt(round)
+              }
+            }
+          } else {
+            // Handle player ID - fetch from API
+            try {
+              const response = await fetch(`/api/players/${id}`)
+              if (response.ok) {
+                const player = await response.json()
+                return {
+                  id,
+                  kind: 'player' as const,
+                  label: player.name || `Player ${id}`,
+                  value: 0,
+                  meta: {
+                    position: player.position,
+                    team: player.team,
+                    age: player.age
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('Error fetching player:', error)
+            }
+            // Fallback for failed fetch
+            return {
+              id,
+              kind: 'player' as const,
+              label: `Player ${id}`,
+              value: 0,
+              meta: {}
+            }
+          }
+        })
+      )
+
+      // Load example trade into the builder
+      setTeamAAssets(teamAAssets)
+      setTeamBAssets(teamBAssets)
+      setLeagueSettings(trade.settings)
+      
+      onExampleTrade?.(trade)
+      handleDismiss()
+    } catch (error) {
+      console.error('Error loading example trade:', error)
+      // Fallback to simple implementation
+      setTeamAAssets(trade.teamA.map(id => ({ id, kind: 'player', label: id, value: 0 })))
+      setTeamBAssets(trade.teamB.map(id => ({ id, kind: 'player', label: id, value: 0 })))
+      setLeagueSettings(trade.settings)
+      onExampleTrade?.(trade)
+      handleDismiss()
+    }
   }
 
   if (!isVisible) {

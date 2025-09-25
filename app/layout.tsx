@@ -4,6 +4,7 @@ import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import Providers from './providers'
 import { Toaster } from '@/components/ui/toaster'
+import { AppShell } from '@/components/AppShell'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -18,10 +19,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" className="dark">
+      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} bg-bg text-text`}>
         <Providers>
-          {children}
+          <AppShell>
+            {children}
+          </AppShell>
         </Providers>
         <Toaster />
         <Analytics />

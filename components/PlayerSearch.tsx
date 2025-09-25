@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Search, Plus, ChevronDown, X } from "lucide-react"
+import { Search, Plus, ChevronDown, X, Calendar } from "lucide-react"
 import { useTradeStore, type Asset } from "@/lib/store"
 import { safeArray } from "@/lib/safe"
 import { useToast } from "./Toast"
@@ -193,15 +193,134 @@ export function PlayerSearch({ onAssetAdded, searchRef, isAssetDuplicate }: Play
         <CardContent>
           <div className="space-y-4">
             <div className="relative">
-              <Input
-                ref={searchRef}
-                placeholder="Search for players or picks... (Press / to focus)"
-                value={searchTerm}
-                onChange={handleInputChange}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-                data-testid="player-search-input"
-              />
+              <div className="flex">
+                <Input
+                  ref={searchRef}
+                  placeholder="Search for players or picks... (Press / to focus)"
+                  value={searchTerm}
+                  onChange={handleInputChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  data-testid="player-search-input"
+                  className="rounded-r-none"
+                />
+                <div className="flex border border-l-0 border-border rounded-r-md">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-10 px-2 rounded-none border-r border-border"
+                    onClick={() => {
+                      // Quick add popular players
+                      const popularPlayers = ['Josh Allen', 'Patrick Mahomes', 'CeeDee Lamb', 'Travis Kelce']
+                      const randomPlayer = popularPlayers[Math.floor(Math.random() * popularPlayers.length)]
+                      setSearchTerm(randomPlayer)
+                    }}
+                    title="Quick add popular player"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-10 px-2 rounded-r-md"
+                    onClick={() => {
+                      setShowDropdown(showDropdown === 'search' ? null : 'search')
+                    }}
+                    title="Search options"
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Search dropdown menu */}
+              {showDropdown === 'search' && (
+                <div className="absolute top-full right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-20 min-w-48">
+                  <div className="p-1 space-y-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-sm"
+                      onClick={() => {
+                        setSearchTerm('QB')
+                        setShowDropdown(null)
+                      }}
+                    >
+                      <Search className="h-4 w-4 mr-2" />
+                      Search QBs
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-sm"
+                      onClick={() => {
+                        setSearchTerm('RB')
+                        setShowDropdown(null)
+                      }}
+                    >
+                      <Search className="h-4 w-4 mr-2" />
+                      Search RBs
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-sm"
+                      onClick={() => {
+                        setSearchTerm('WR')
+                        setShowDropdown(null)
+                      }}
+                    >
+                      <Search className="h-4 w-4 mr-2" />
+                      Search WRs
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-sm"
+                      onClick={() => {
+                        setSearchTerm('TE')
+                        setShowDropdown(null)
+                      }}
+                    >
+                      <Search className="h-4 w-4 mr-2" />
+                      Search TEs
+                    </Button>
+                    <div className="border-t border-border my-1" />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-sm"
+                      onClick={() => {
+                        setSearchTerm('2025')
+                        setShowDropdown(null)
+                      }}
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Search 2025 Picks
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-sm"
+                      onClick={() => {
+                        setSearchTerm('2026')
+                        setShowDropdown(null)
+                      }}
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Search 2026 Picks
+                    </Button>
+                  </div>
+                </div>
+              )}
               {isOpen && (
                 <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
                   {isLoading ? (

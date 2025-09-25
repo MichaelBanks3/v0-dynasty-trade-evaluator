@@ -1,5 +1,3 @@
-import { prisma } from './db'
-
 // Event types for analytics
 export type EventType = 
   | 'evaluate'
@@ -25,7 +23,7 @@ export type EventType =
   | 'trade_finder_copy_blurb'
   | 'trade_finder_no_proposal'
 
-// Track an event for analytics
+// Track an event for analytics (client-safe version)
 export async function trackEvent(
   eventType: EventType,
   options: {
@@ -36,14 +34,19 @@ export async function trackEvent(
   } = {}
 ) {
   try {
-    await prisma.event.create({
-      data: {
+    // Use fetch to call the analytics API endpoint instead of direct Prisma
+    await fetch('/api/analytics/track', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         eventType,
         userId: options.userId || null,
         anonId: options.anonId || null,
         payloadHash: options.payloadHash || null,
         durationMs: options.durationMs || null
-      }
+      })
     })
   } catch (error) {
     // Don't throw errors for analytics - just log them

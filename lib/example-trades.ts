@@ -15,8 +15,8 @@ export const exampleTrades: ExampleTrade[] = [
     id: 'superflex-qb-trade',
     title: 'Superflex QB Trade',
     description: 'Elite QB for young WR in Superflex league',
-    teamA: ['player:1'], // Patrick Mahomes
-    teamB: ['player:2', 'player:3'], // Josh Allen + CeeDee Lamb
+    teamA: ['1'], // Patrick Mahomes
+    teamB: ['2', '3'], // Josh Allen + CeeDee Lamb
     settings: {
       scoring: 'PPR',
       superflex: true,
@@ -31,8 +31,8 @@ export const exampleTrades: ExampleTrade[] = [
     id: 'te-premium-trade',
     title: 'TE Premium Trade',
     description: 'Elite TE vs high-end WR2 in TE Premium league',
-    teamA: ['player:4'], // Travis Kelce
-    teamB: ['player:5', 'player:6'], // Stefon Diggs + 2025 1st
+    teamA: ['4'], // Travis Kelce
+    teamB: ['5', 'pick:2025:1'], // Stefon Diggs + 2025 1st
     settings: {
       scoring: 'PPR',
       superflex: false,
@@ -47,8 +47,8 @@ export const exampleTrades: ExampleTrade[] = [
     id: 'rebuild-vs-win-now',
     title: 'Rebuild vs Win-Now',
     description: 'Veteran RB for young prospects and picks',
-    teamA: ['player:7'], // Derrick Henry
-    teamB: ['player:8', 'player:9', 'player:10'], // Breece Hall + 2025 1st + 2026 2nd
+    teamA: ['7'], // Derrick Henry
+    teamB: ['8', 'pick:2025:1', 'pick:2026:2'], // Breece Hall + 2025 1st + 2026 2nd
     settings: {
       scoring: 'PPR',
       superflex: false,
@@ -63,8 +63,8 @@ export const exampleTrades: ExampleTrade[] = [
     id: 'balanced-trade',
     title: 'Balanced Trade',
     description: 'Fair trade with similar value on both sides',
-    teamA: ['player:11', 'player:12'], // Davante Adams + 2025 2nd
-    teamB: ['player:13', 'player:14'], // Tyreek Hill + 2025 3rd
+    teamA: ['11', 'pick:2025:2'], // Davante Adams + 2025 2nd
+    teamB: ['13', 'pick:2025:3'], // Tyreek Hill + 2025 3rd
     settings: {
       scoring: 'PPR',
       superflex: false,

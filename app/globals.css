@@ -4,76 +4,44 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated to football-themed green/white/brown color scheme */
-  --background: oklch(0.98 0.01 85); /* Cream white */
-  --foreground: oklch(0.25 0.05 120); /* Dark forest green */
-  --card: oklch(0.99 0.005 85); /* Pure cream */
-  --card-foreground: oklch(0.25 0.05 120); /* Dark forest green */
-  --popover: oklch(0.99 0.005 85); /* Pure cream */
-  --popover-foreground: oklch(0.25 0.05 120); /* Dark forest green */
-  --primary: oklch(0.35 0.12 135); /* Forest green */
-  --primary-foreground: oklch(0.98 0.01 85); /* Cream white */
-  --secondary: oklch(0.45 0.08 65); /* Rich brown */
-  --secondary-foreground: oklch(0.98 0.01 85); /* Cream white */
-  --muted: oklch(0.92 0.02 85); /* Light cream */
-  --muted-foreground: oklch(0.5 0.04 120); /* Medium green */
-  --accent: oklch(0.55 0.15 140); /* Bright grass green */
-  --accent-foreground: oklch(0.98 0.01 85); /* Cream white */
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.85 0.03 85); /* Light brown border */
-  --input: oklch(0.95 0.02 85); /* Very light cream */
-  --ring: oklch(0.55 0.15 140); /* Bright grass green */
-  --chart-1: oklch(0.55 0.15 140); /* Bright grass green */
-  --chart-2: oklch(0.45 0.08 65); /* Rich brown */
-  --chart-3: oklch(0.35 0.12 135); /* Forest green */
-  --chart-4: oklch(0.65 0.12 150); /* Light green */
-  --chart-5: oklch(0.55 0.06 55); /* Medium brown */
-  --radius: 0.625rem;
-  --sidebar: oklch(0.98 0.01 85); /* Cream white */
-  --sidebar-foreground: oklch(0.25 0.05 120); /* Dark forest green */
-  --sidebar-primary: oklch(0.35 0.12 135); /* Forest green */
-  --sidebar-primary-foreground: oklch(0.98 0.01 85); /* Cream white */
-  --sidebar-accent: oklch(0.92 0.02 85); /* Light cream */
-  --sidebar-accent-foreground: oklch(0.25 0.05 120); /* Dark forest green */
-  --sidebar-border: oklch(0.85 0.03 85); /* Light brown border */
-  --sidebar-ring: oklch(0.55 0.15 140); /* Bright grass green */
-}
-
-.dark {
-  /* Updated dark mode to complement the football theme */
-  --background: oklch(0.15 0.02 120); /* Dark forest green */
-  --foreground: oklch(0.95 0.01 85); /* Light cream */
-  --card: oklch(0.18 0.03 120); /* Slightly lighter dark green */
-  --card-foreground: oklch(0.95 0.01 85); /* Light cream */
-  --popover: oklch(0.18 0.03 120); /* Slightly lighter dark green */
-  --popover-foreground: oklch(0.95 0.01 85); /* Light cream */
-  --primary: oklch(0.65 0.15 140); /* Bright grass green */
-  --primary-foreground: oklch(0.15 0.02 120); /* Dark forest green */
-  --secondary: oklch(0.35 0.06 65); /* Dark brown */
-  --secondary-foreground: oklch(0.95 0.01 85); /* Light cream */
-  --muted: oklch(0.25 0.03 120); /* Medium dark green */
-  --muted-foreground: oklch(0.75 0.02 85); /* Medium cream */
-  --accent: oklch(0.55 0.12 140); /* Medium grass green */
-  --accent-foreground: oklch(0.15 0.02 120); /* Dark forest green */
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.3 0.04 120); /* Dark green border */
-  --input: oklch(0.22 0.03 120); /* Dark green input */
-  --ring: oklch(0.65 0.15 140); /* Bright grass green */
-  --chart-1: oklch(0.65 0.15 140); /* Bright grass green */
-  --chart-2: oklch(0.55 0.08 65); /* Medium brown */
-  --chart-3: oklch(0.75 0.12 135); /* Light forest green */
-  --chart-4: oklch(0.45 0.12 150); /* Dark green */
-  --chart-5: oklch(0.65 0.06 55); /* Light brown */
-  --sidebar: oklch(0.12 0.02 120); /* Very dark green */
-  --sidebar-foreground: oklch(0.95 0.01 85); /* Light cream */
-  --sidebar-primary: oklch(0.65 0.15 140); /* Bright grass green */
-  --sidebar-primary-foreground: oklch(0.15 0.02 120); /* Dark forest green */
-  --sidebar-accent: oklch(0.25 0.03 120); /* Medium dark green */
-  --sidebar-accent-foreground: oklch(0.95 0.01 85); /* Light cream */
-  --sidebar-border: oklch(0.3 0.04 120); /* Dark green border */
-  --sidebar-ring: oklch(0.65 0.15 140); /* Bright grass green */
+  /* DraftKings-like dark theme tokens */
+  --bg: #0B0F14; /* Page background */
+  --surface: #11161C; /* Card background */
+  --muted: #1A2430; /* Muted elements */
+  --text: #E6F0FF; /* Primary text */
+  --subtext: #9FB2C8; /* Secondary text */
+  --accent: #16DB65; /* Neon green */
+  --accent-contrast: #07210F; /* Dark green for contrast */
+  --danger: #FF3B3B; /* Red for danger */
+  --warn: #FFC145; /* Yellow for warnings */
+  --info: #3BA3FF; /* Blue for info */
+  
+  /* Shadcn/ui compatibility */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-contrast);
+  --secondary: var(--muted);
+  --secondary-foreground: var(--text);
+  --muted: var(--muted);
+  --muted-foreground: var(--subtext);
+  --accent: var(--accent);
+  --accent-foreground: var(--accent-contrast);
+  --destructive: var(--danger);
+  --destructive-foreground: var(--text);
+  --border: rgba(255, 255, 255, 0.06);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: var(--accent);
+  --chart-1: var(--accent);
+  --chart-2: var(--info);
+  --chart-3: var(--warn);
+  --chart-4: var(--danger);
+  --chart-5: var(--subtext);
+  --radius: 0.75rem;
 }
 
 @theme inline {
@@ -107,21 +75,51 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html {
+    @apply dark; /* Force dark mode by default */
+  }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    background-color: var(--bg);
+    color: var(--text);
+  }
+  
+  /* Card styling */
+  .card {
+    @apply bg-surface border border-border/50 rounded-xl shadow-md;
+    background-color: var(--surface);
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+  
+  /* Button styling */
+  .btn-primary {
+    @apply bg-accent text-accent-contrast hover:shadow-glow focus:ring-2 focus:ring-accent/50;
+    background-color: var(--accent);
+    color: var(--accent-contrast);
+  }
+  
+  .btn-secondary {
+    @apply bg-muted text-foreground border border-border hover:bg-muted/80;
+    background-color: var(--muted);
+    color: var(--text);
+  }
+  
+  /* Progress bars */
+  .progress-bar {
+    @apply overflow-hidden rounded-lg bg-muted/20;
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+  
+  /* Focus states */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-accent/50 focus:ring-offset-2 focus:ring-offset-background;
   }
 }
