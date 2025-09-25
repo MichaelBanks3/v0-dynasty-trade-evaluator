@@ -16,7 +16,6 @@ interface Player {
 interface EvaluationResult {
   totalA: number
   totalB: number
-  diff: number
   verdict: string
   teamAPlayers: Player[]
   teamBPlayers: Player[]
@@ -112,7 +111,7 @@ export function TradeResultCard({ result }: TradeResultCardProps) {
 
         <div className="mt-4 pt-4 border-t">
           <p className="text-sm text-muted-foreground mb-4">
-            Difference: {result.diff} points
+            Difference: {Math.abs(result.totalA - result.totalB)} points
             {result.saved && ' • Trade saved to your history'}
           </p>
           

@@ -18,7 +18,6 @@ interface Player {
 interface EvaluationResult {
   totalA: number
   totalB: number
-  diff: number
   verdict: string
   teamAPlayers: Player[]
   teamBPlayers: Player[]

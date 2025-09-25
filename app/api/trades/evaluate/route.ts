@@ -62,12 +62,11 @@ export async function POST(request: NextRequest) {
         await prisma.trade.create({
           data: {
             userId,
-            teamAIds: teamA,
-            teamBIds: teamB,
+            sideAPlayerIds: teamA.map(String),
+            sideBPlayerIds: teamB.map(String),
             totalA,
             totalB,
-            verdict,
-            diff
+            verdict
           }
         })
         result.saved = true
