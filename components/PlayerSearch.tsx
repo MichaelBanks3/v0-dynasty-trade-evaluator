@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,35 +18,65 @@ interface PlayerSearchProps {
 export function PlayerSearch({ onSelectAsset, selectedAssets }: PlayerSearchProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [isOpen, setIsOpen] = useState(false)
-  const [allAssets, setAllAssets] = useState<Asset[]>([])
+  const [searchResults, setSearchResults] = useState<Asset[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasSearched, setHasSearched] = useState(false)
 
   // Safely get selected assets
   const safeSelectedAssets = safeArray(selectedAssets)
 
-  useEffect(() => {
-    // Fetch players from API
-    fetch('/api/players')
-      .then(res => res.json())
-      .then(data => {
-        // Safely handle the response
-        const players = safeArray(data)
-        setAllAssets(players)
-      })
-      .catch(error => {
-        console.error('Error fetching players:', error)
-        setAllAssets([])
-      })
-  }, [])
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce(async (query: string) => {
+      if (!query.trim()) {
+        setSearchResults([])
+        setHasSearched(false)
+        return
+      }
 
-  const filteredAssets = useMemo(() => {
-    if (!searchTerm.trim()) return []
-    
-    // Safely filter assets
-    const safeAssets = safeArray(allAssets)
-    return safeAssets.filter((asset) => 
-      asset?.label?.toLowerCase().includes(searchTerm.toLowerCase())
-    ).slice(0, 20) // Limit to 20 results
-  }, [searchTerm, allAssets])
+      setIsLoading(true)
+      try {
+        const response = await fetch(`/api/players?q=${encodeURIComponent(query)}`)
+        const data = await response.json()
+        
+        // Safely handle the response
+        const results = safeArray(data)
+        setSearchResults(results)
+        setHasSearched(true)
+      } catch (error) {
+        console.error('Error searching players:', error)
+        setSearchResults([])
+        setHasSearched(true)
+      } finally {
+        setIsLoading(false)
+      }
+    }, 300),
+    []
+  )
+
+  // Effect to trigger search when searchTerm changes
+  useEffect(() => {
+    debouncedSearch(searchTerm)
+  }, [searchTerm, debouncedSearch])
+
+  // Load initial popular players when component mounts
+  useEffect(() => {
+    const loadPopularPlayers = async () => {
+      try {
+        const response = await fetch('/api/players')
+        const data = await response.json()
+        const results = safeArray(data)
+        setSearchResults(results.slice(0, 10)) // Show top 10 popular players
+        setHasSearched(true)
+      } catch (error) {
+        console.error('Error loading popular players:', error)
+        setSearchResults([])
+        setHasSearched(true)
+      }
+    }
+
+    loadPopularPlayers()
+  }, [])
 
   const isAssetSelected = (asset: Asset) => {
     return safeSelectedAssets.some((selected) => selected?.id === asset?.id)
@@ -58,6 +88,21 @@ export function PlayerSearch({ onSelectAsset, selectedAssets }: PlayerSearchProp
       setSearchTerm("")
       setIsOpen(false)
     }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchTerm(value)
+    setIsOpen(true)
+  }
+
+  const handleInputFocus = () => {
+    setIsOpen(true)
+  }
+
+  const handleInputBlur = () => {
+    // Delay closing to allow clicks on results
+    setTimeout(() => setIsOpen(false), 200)
   }
 
   return (
@@ -74,15 +119,21 @@ export function PlayerSearch({ onSelectAsset, selectedAssets }: PlayerSearchProp
             <Input
               placeholder="Search for players or picks..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onFocus={() => setIsOpen(true)}
+              onChange={handleInputChange}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
               data-testid="player-search-input"
             />
-            {isOpen && searchTerm && (
+            {isOpen && (
               <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
-                {filteredAssets.length > 0 ? (
+                {isLoading ? (
+                  <div className="p-4 text-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+                    <p className="text-sm text-muted-foreground">Searching...</p>
+                  </div>
+                ) : searchResults.length > 0 ? (
                   <div className="p-2 space-y-1">
-                    {filteredAssets.map((asset) => (
+                    {searchResults.map((asset) => (
                       <div
                         key={asset?.id || Math.random()}
                         className="flex items-center justify-between p-2 hover:bg-accent rounded cursor-pointer"
@@ -121,10 +172,14 @@ export function PlayerSearch({ onSelectAsset, selectedAssets }: PlayerSearchProp
                       </div>
                     ))}
                   </div>
-                ) : (
+                ) : hasSearched ? (
                   <div className="p-4 text-center text-muted-foreground">
                     <p className="text-sm">No players found</p>
                     <p className="text-sm">Try a different search term</p>
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <p className="text-sm">Start typing to search...</p>
                   </div>
                 )}
               </div>
@@ -134,4 +189,22 @@ export function PlayerSearch({ onSelectAsset, selectedAssets }: PlayerSearchProp
       </CardContent>
     </Card>
   )
+}
+
+// Debounce utility function
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null
+  
+  return (...args: Parameters<T>) => {
+    if (timeout) {
+      clearTimeout(timeout)
+    }
+    
+    timeout = setTimeout(() => {
+      func(...args)
+    }, wait)
+  }
 }

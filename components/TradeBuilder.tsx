@@ -9,7 +9,7 @@ import { safeArray } from "@/lib/safe"
 import { PlayerSearch } from "./PlayerSearch"
 
 export function TradeBuilder() {
-  const { teamAAssets, teamBAssets, removeAssetFromTeam } = useTradeStore()
+  const { teamAAssets, teamBAssets, removeAssetFromTeam, addAssetToTeam } = useTradeStore()
 
   // Safely get arrays
   const safeTeamAAssets = safeArray(teamAAssets)
@@ -18,10 +18,21 @@ export function TradeBuilder() {
   const teamATotal = safeTeamAAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
   const teamBTotal = safeTeamBAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
 
+  // Get all selected assets for the search component
+  const allSelectedAssets = [...safeTeamAAssets, ...safeTeamBAssets]
+
+  const handleAssetSelect = (asset: any) => {
+    // Add to Team A by default (user can move later if needed)
+    addAssetToTeam("A", asset)
+  }
+
   return (
     <div className="space-y-8">
       {/* Player Search */}
-      <PlayerSearch />
+      <PlayerSearch 
+        onSelectAsset={handleAssetSelect}
+        selectedAssets={allSelectedAssets}
+      />
 
       {/* Team A */}
       <Card data-testid="team-a-builder">
