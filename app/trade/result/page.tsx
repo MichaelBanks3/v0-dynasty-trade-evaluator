@@ -31,10 +31,13 @@ export default function TradeResultPage() {
 }
 
 function TradeResultPageContent() {
-  const { teamAAssets, teamBAssets } = useTradeStore()
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Use store selectors directly for reactivity
+  const teamAAssets = useTradeStore((state: any) => state.teamAAssets)
+  const teamBAssets = useTradeStore((state: any) => state.teamBAssets)
 
   // Safely get arrays
   const safeTeamAAssets = safeArray(teamAAssets)
@@ -89,7 +92,7 @@ function TradeResultPageContent() {
   }, [safeTeamAAssets, safeTeamBAssets])
 
   if (safeTeamAAssets.length === 0 && safeTeamBAssets.length === 0) {
-    return (
+  return (
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-16">
@@ -116,12 +119,12 @@ function TradeResultPageContent() {
             <p className="text-muted-foreground">Evaluating your trade...</p>
           </div>
         </div>
-      </div>
+                  </div>
     )
   }
 
   if (error) {
-    return (
+                      return (
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-16">
@@ -131,14 +134,14 @@ function TradeResultPageContent() {
             <Button asChild>
               <a href="/trade">Try Again</a>
             </Button>
-          </div>
-        </div>
-      </div>
-    )
+                            </div>
+                          </div>
+                        </div>
+                      )
   }
 
   if (!result) {
-    return (
+                      return (
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-16">
@@ -147,7 +150,7 @@ function TradeResultPageContent() {
             <p className="text-muted-foreground mb-6">Unable to evaluate the trade.</p>
             <Button asChild>
               <a href="/trade">Try Again</a>
-            </Button>
+              </Button>
           </div>
         </div>
       </div>

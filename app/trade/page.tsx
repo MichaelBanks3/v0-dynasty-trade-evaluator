@@ -56,8 +56,11 @@ export default function TradePage() {
 }
 
 function TradePageContent() {
-  const { teamAAssets, teamBAssets } = useTradeStore()
   const router = useRouter()
+
+  // Use store selectors directly for reactivity
+  const teamAAssets = useTradeStore((state: any) => state.teamAAssets)
+  const teamBAssets = useTradeStore((state: any) => state.teamBAssets)
 
   // Safely get arrays and compute totals
   const safeTeamAAssets = safeArray(teamAAssets)

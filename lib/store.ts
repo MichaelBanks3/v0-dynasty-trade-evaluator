@@ -40,9 +40,11 @@ export interface TradeState {
 // Singleton guard to ensure only one store instance
 const createTradeStore = () => {
   if (typeof window !== 'undefined' && (window as any).__TRADE_STORE__) {
+    console.log("[STORE] Returning existing singleton instance")
     return (window as any).__TRADE_STORE__
   }
 
+  console.log("[STORE] Creating new singleton instance")
   const store = create<TradeState>((set, get) => ({
     teamAAssets: [],
     teamBAssets: [],
@@ -53,36 +55,62 @@ const createTradeStore = () => {
     },
 
     addAssetToTeam: (team, asset) => {
-      const key = team === "A" ? "teamAAssets" : "teamBAssets"
-      const currentAssets = safeArray(get()[key])
-      const otherKey = team === "A" ? "teamBAssets" : "teamAAssets"
-      const otherAssets = safeArray(get()[otherKey])
+      console.log("[STORE] addAssetToTeam called", { team, assetId: asset.id, assetLabel: asset.label })
+      
+      const currentState = get()
+      const currentAssets = safeArray(currentState.teamAAssets)
+      const otherAssets = safeArray(currentState.teamBAssets)
+
+      console.log("[STORE] Current state", { 
+        currentTeamAssets: currentAssets.length, 
+        otherTeamAssets: otherAssets.length,
+        currentAssetIds: currentAssets.map(a => a.id),
+        otherAssetIds: otherAssets.map(a => a.id)
+      })
 
       // Prevent duplicates within the same team
       if (currentAssets.some((a) => a?.id === asset?.id)) {
-        if (process.env.NODE_ENV !== "production") {
-          console.log(`Asset ${asset.id} already in Team ${team}`)
-        }
+        console.log(`[STORE] Asset ${asset.id} already in Team ${team}`)
         return false
       }
 
       // Prevent duplicates across teams
       if (otherAssets.some((a) => a?.id === asset?.id)) {
-        if (process.env.NODE_ENV !== "production") {
-          console.log(`Asset ${asset.id} already in other team`)
-        }
+        console.log(`[STORE] Asset ${asset.id} already in other team`)
         return false
       }
 
-      set((state) => ({
-        ...state,
-        [key]: [...currentAssets, asset],
-      }))
+      console.log("[STORE] Adding asset to team", { team, assetId: asset.id })
+      
+      // IMMUTABLE UPDATE - create new arrays
+      set((state) => {
+        const newTeamAAssets = team === "A" 
+          ? [...safeArray(state.teamAAssets), asset]
+          : [...safeArray(state.teamAAssets)]
+        
+        const newTeamBAssets = team === "B" 
+          ? [...safeArray(state.teamBAssets), asset]
+          : [...safeArray(state.teamBAssets)]
+
+        const newState = {
+          ...state,
+          teamAAssets: newTeamAAssets,
+          teamBAssets: newTeamBAssets,
+        }
+        
+        console.log("[STORE] New state after add", { 
+          teamAAssets: newState.teamAAssets.length, 
+          teamBAssets: newState.teamBAssets.length,
+          newTeamAAssetsRef: newTeamAAssets !== state.teamAAssets,
+          newTeamBAssetsRef: newTeamBAssets !== state.teamBAssets
+        })
+        return newState
+      })
 
       // Dev instrumentation
       if (process.env.NODE_ENV !== "production") {
         const newState = get()
-        console.log({
+        console.log("[STORE] Dev instrumentation", {
           activeSide: newState.activeSide,
           added: { id: asset.id, kind: asset.kind },
           counts: { 
@@ -96,18 +124,37 @@ const createTradeStore = () => {
     },
 
     removeAssetFromTeam: (team, assetId) => {
-      const key = team === "A" ? "teamAAssets" : "teamBAssets"
-      const currentAssets = safeArray(get()[key])
+      console.log("[STORE] removeAssetFromTeam called", { team, assetId })
+      
+      // IMMUTABLE UPDATE - create new filtered arrays
+      set((state) => {
+        const newTeamAAssets = team === "A" 
+          ? safeArray(state.teamAAssets).filter((asset) => asset?.id !== assetId)
+          : [...safeArray(state.teamAAssets)]
+        
+        const newTeamBAssets = team === "B" 
+          ? safeArray(state.teamBAssets).filter((asset) => asset?.id !== assetId)
+          : [...safeArray(state.teamBAssets)]
 
-      set((state) => ({
-        ...state,
-        [key]: currentAssets.filter((asset) => asset?.id !== assetId),
-      }))
+        const newState = {
+          ...state,
+          teamAAssets: newTeamAAssets,
+          teamBAssets: newTeamBAssets,
+        }
+        
+        console.log("[STORE] New state after remove", { 
+          teamAAssets: newState.teamAAssets.length, 
+          teamBAssets: newState.teamBAssets.length,
+          newTeamAAssetsRef: newTeamAAssets !== state.teamAAssets,
+          newTeamBAssetsRef: newTeamBAssets !== state.teamBAssets
+        })
+        return newState
+      })
 
       // Dev instrumentation
       if (process.env.NODE_ENV !== "production") {
         const newState = get()
-        console.log({
+        console.log("[STORE] Dev instrumentation", {
           action: 'remove',
           team,
           removed: assetId,
@@ -120,6 +167,7 @@ const createTradeStore = () => {
     },
 
     setActiveSide: (side) => {
+      console.log("[STORE] setActiveSide called", { side })
       set((state) => ({
         ...state,
         activeSide: side,
@@ -134,6 +182,7 @@ const createTradeStore = () => {
     },
 
     clearTrade: () => {
+      console.log("[STORE] clearTrade called")
       set((state) => ({
         ...state,
         teamAAssets: [],
@@ -143,21 +192,26 @@ const createTradeStore = () => {
     },
 
     getTeamTotal: (team) => {
-      const key = team === "A" ? "teamAAssets" : "teamBAssets"
-      const assets = safeArray(get()[key])
+      const currentState = get()
+      const assets = team === "A" ? safeArray(currentState.teamAAssets) : safeArray(currentState.teamBAssets)
       return assets.reduce((sum, asset) => sum + (asset?.value || 0), 0)
     },
 
     isAssetInAnyTeam: (assetId) => {
-      const teamAAssets = safeArray(get().teamAAssets)
-      const teamBAssets = safeArray(get().teamBAssets)
-      return teamAAssets.some((a) => a?.id === assetId) || teamBAssets.some((a) => a?.id === assetId)
+      const currentState = get()
+      const teamAAssets = safeArray(currentState.teamAAssets)
+      const teamBAssets = safeArray(currentState.teamBAssets)
+      const inA = teamAAssets.some((a) => a?.id === assetId)
+      const inB = teamBAssets.some((a) => a?.id === assetId)
+      console.log("[STORE] isAssetInAnyTeam", { assetId, inA, inB })
+      return inA || inB
     },
   }))
 
   // Store the singleton instance globally
   if (typeof window !== 'undefined') {
     (window as any).__TRADE_STORE__ = store
+    console.log("[STORE] Stored singleton in window.__TRADE_STORE__")
   }
 
   return store

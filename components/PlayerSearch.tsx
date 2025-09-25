@@ -106,24 +106,39 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
     loadPopularPlayers()
   }, [])
 
-  // Single helper function for adding assets
-  const handleAddToTeam = (asset: Asset, targetTeam: "A" | "B") => {
-    // Read current state at click time (not stale closure)
+  // SINGLE ADD HANDLER - all add actions go through this
+  const handleAdd = (asset: Asset, targetTeam: "A" | "B") => {
+    console.log("[ADD] Starting add process", { assetId: asset.id, targetTeam })
+    
+    // Read current state at call time (not stale closure)
     const currentActiveSide = useTradeStore.getState().activeSide
     const currentIsAssetInAnyTeam = useTradeStore.getState().isAssetInAnyTeam
     
+    console.log("[ADD] Current state", { 
+      currentActiveSide, 
+      targetTeam, 
+      isAlreadyAdded: currentIsAssetInAnyTeam(asset.id) 
+    })
+    
     if (currentIsAssetInAnyTeam(asset.id)) {
+      console.log("[ADD] Asset already added, showing toast")
       showToast("This player/pick is already on a team")
       return
     }
 
+    console.log("[ADD] Calling addAssetToTeam", { targetTeam, asset })
     const success = addAssetToTeam(targetTeam, asset)
+    
+    console.log("[ADD] addAssetToTeam result", { success })
+    
     if (success) {
+      console.log("[ADD] Success - showing toast and calling callback")
       showToast(`Added to Team ${targetTeam}`)
       onAssetAdded?.(asset, targetTeam)
       setSearchTerm("")
       setIsOpen(false)
     } else {
+      console.log("[ADD] Failed - showing error toast")
       showToast("Cannot add—unknown error")
     }
   }
@@ -132,9 +147,10 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
     if (e.key === 'Enter') {
       e.preventDefault()
       e.stopPropagation()
+      console.log("[ADD] Enter key pressed")
       // Use current active side at keypress time
       const currentActiveSide = useTradeStore.getState().activeSide
-      handleAddToTeam(asset, currentActiveSide)
+      handleAdd(asset, currentActiveSide)
     }
   }
 
@@ -229,24 +245,30 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
                               ) : (
                                 <div className="relative">
                                   <Button
+                                    type="button"
                                     variant="ghost"
                                     size="sm"
                                     className="h-8 w-8 p-0"
                                     onClick={(e) => {
+                                      e.preventDefault()
                                       e.stopPropagation()
+                                      console.log("[ADD] Primary button clicked")
                                       const currentActiveSide = useTradeStore.getState().activeSide
-                                      handleAddToTeam(asset, currentActiveSide)
+                                      handleAdd(asset, currentActiveSide)
                                     }}
                                     data-testid={`add-${asset.id}-${activeSide.toLowerCase()}`}
                                   >
                                     <Plus className="h-4 w-4" />
                                   </Button>
                                   <Button
+                                    type="button"
                                     variant="ghost"
                                     size="sm"
                                     className="h-6 w-4 p-0 ml-1"
                                     onClick={(e) => {
+                                      e.preventDefault()
                                       e.stopPropagation()
+                                      console.log("[ADD] Dropdown button clicked")
                                       setShowDropdown(isDropdownOpen ? null : asset.id)
                                     }}
                                     data-testid={`dropdown-${asset.id}`}
@@ -257,12 +279,15 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
                                     <div className="absolute top-full right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-20">
                                       <div className="p-1 space-y-1">
                                         <Button
+                                          type="button"
                                           variant="ghost"
                                           size="sm"
                                           className="w-full justify-start text-xs"
                                           onClick={(e) => {
+                                            e.preventDefault()
                                             e.stopPropagation()
-                                            handleAddToTeam(asset, "A")
+                                            console.log("[ADD] Add to Team A clicked")
+                                            handleAdd(asset, "A")
                                             setShowDropdown(null)
                                           }}
                                           data-testid={`add-${asset.id}-a`}
@@ -270,12 +295,15 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
                                           Add to Team A
                                         </Button>
                                         <Button
+                                          type="button"
                                           variant="ghost"
                                           size="sm"
                                           className="w-full justify-start text-xs"
                                           onClick={(e) => {
+                                            e.preventDefault()
                                             e.stopPropagation()
-                                            handleAddToTeam(asset, "B")
+                                            console.log("[ADD] Add to Team B clicked")
+                                            handleAdd(asset, "B")
                                             setShowDropdown(null)
                                           }}
                                           data-testid={`add-${asset.id}-b`}
