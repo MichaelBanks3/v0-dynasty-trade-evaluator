@@ -34,18 +34,18 @@ model Player {
   position    Position
   team        String?
   age         Int?
-  dob         DateTime?    // Date of birth
+  dob         DateTime? // Date of birth
   status      PlayerStatus @default(ACTIVE)
-  tier        Int?         // ECR tier from FantasyPros
+  tier        Int? // ECR tier from FantasyPros
   lastUpdated DateTime     @default(now())
-  
+
   // Legacy field for backward compatibility
-  value       Int          @default(0)
-  createdAt   DateTime     @default(now())
-  
+  value     Int      @default(0)
+  createdAt DateTime @default(now())
+
   // Relations
-  valuations  Valuation[]
-  
+  valuations Valuation[]
+
   // Indexes for search performance
   @@index([name])
   @@index([position])
@@ -55,33 +55,33 @@ model Player {
 
 // Valuation data with league settings
 model Valuation {
-  id           Int      @id @default(autoincrement())
-  playerId     Int
-  scoring      String   @default("PPR") // PPR, Half, Standard
-  superflex    Boolean  @default(false)
-  tePremium    Float    @default(1.0)   // TE premium multiplier
-  
+  id        Int     @id @default(autoincrement())
+  playerId  Int
+  scoring   String  @default("PPR") // PPR, Half, Standard
+  superflex Boolean @default(false)
+  tePremium Float   @default(1.0) // TE premium multiplier
+
   // Component values
-  marketValue      Float? // KTC/DP market value
-  projNow          Float? // Current season projection
-  projFuture       Float? // Future projection NPV
-  projNowRaw       Float? // Raw projection value before normalization
-  projFutureRaw    Float? // Raw projection value before normalization
-  projConfidence   Float? // Confidence score for projections
-  projSource       String? // Source of projections
-  ageAdjustment    Float? // Age curve adjustment
-  riskAdjustment   Float? // Injury/risk adjustment
-  
+  marketValue    Float? // KTC/DP market value
+  projNow        Float? // Current season projection
+  projFuture     Float? // Future projection NPV
+  projNowRaw     Float? // Raw projection value before normalization
+  projFutureRaw  Float? // Raw projection value before normalization
+  projConfidence Float? // Confidence score for projections
+  projSource     String? // Source of projections
+  ageAdjustment  Float? // Age curve adjustment
+  riskAdjustment Float? // Injury/risk adjustment
+
   // Composite scores
-  compositeValue   Float? // Final composite score
-  nowScore         Float? // Win-now component
-  futureScore      Float? // Future component
-  
-  updatedAt        DateTime @default(now())
-  
+  compositeValue Float? // Final composite score
+  nowScore       Float? // Win-now component
+  futureScore    Float? // Future component
+
+  updatedAt DateTime @default(now())
+
   // Relations
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  
+
   // Unique constraint per player + settings
   @@unique([playerId, scoring, superflex, tePremium])
   @@index([compositeValue])
@@ -89,16 +89,16 @@ model Valuation {
 
 // Rookie draft picks
 model Pick {
-  id            Int     @id @default(autoincrement())
-  year          Int     // 2025, 2026, 2027
-  round         Int     // 1, 2, 3, 4
-  baselineValue Float   // Base value curve
-  marketValue   Float?  // Market-adjusted value
+  id             Int    @id @default(autoincrement())
+  year           Int // 2025, 2026, 2027
+  round          Int // 1, 2, 3, 4
+  baselineValue  Float // Base value curve
+  marketValue    Float? // Market-adjusted value
   compositeValue Float? // Final composite value
-  
+
   // Computed fields
-  label         String  // "2026 2nd"
-  
+  label String // "2026 2nd"
+
   // Unique constraint per year/round
   @@unique([year, round])
   @@index([year])
@@ -108,30 +108,30 @@ model Pick {
 
 // Enhanced trade model
 model Trade {
-  id               String   @id @default(cuid())
-  userId           String
-  createdAt        DateTime @default(now())
-  
+  id        String   @id @default(cuid())
+  userId    String
+  createdAt DateTime @default(now())
+
   // Trade assets (JSONB for flexibility)
-  teamA            Json?    // Array of {type: "player"|"pick", id: number}
-  teamB            Json?    // Array of {type: "player"|"pick", id: number}
-  
+  teamA Json? // Array of {type: "player"|"pick", id: number}
+  teamB Json? // Array of {type: "player"|"pick", id: number}
+
   // League settings used for evaluation
-  settings         Json?    // {scoring, superflex, tePremium, rosterConfig}
-  
+  settings Json? // {scoring, superflex, tePremium, rosterConfig}
+
   // Evaluation results
-  verdict          String   // FAIR, FAVORS_A, FAVORS_B
-  nowDelta         Float?   // Win-now value difference
-  futureDelta      Float?   // Future value difference
-  breakdown        Json?    // Detailed component breakdown
-  evaluationSnapshot Json?  // Full evaluation result snapshot for sharing
-  slug             String?  @unique // Shareable slug for public access
-  
+  verdict            String // FAIR, FAVORS_A, FAVORS_B
+  nowDelta           Float? // Win-now value difference
+  futureDelta        Float? // Future value difference
+  breakdown          Json? // Detailed component breakdown
+  evaluationSnapshot Json? // Full evaluation result snapshot for sharing
+  slug               String? @unique // Shareable slug for public access
+
   // Legacy fields for backward compatibility
-  sideAPlayerIds   String[] @default([])
-  sideBPlayerIds   String[] @default([])
-  totalA           Int      @default(0)
-  totalB           Int      @default(0)
+  sideAPlayerIds String[] @default([])
+  sideBPlayerIds String[] @default([])
+  totalA         Int      @default(0)
+  totalB         Int      @default(0)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -142,11 +142,11 @@ model Trade {
 
 // User model (enhanced)
 model User {
-  id        String   @id // Clerk userId
-  email     String?  @unique
-  createdAt DateTime @default(now())
-  trades    Trade[]
-  settings  UserSettings?
+  id          String        @id // Clerk userId
+  email       String?       @unique
+  createdAt   DateTime      @default(now())
+  trades      Trade[]
+  settings    UserSettings?
   teamProfile TeamProfile?
 }
 
@@ -154,60 +154,49 @@ model User {
 model UserSettings {
   id        String   @id @default(cuid())
   userId    String   @unique
-  settings  Json     // LeagueSettings object
+  settings  Json // LeagueSettings object
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // System status model
 model SystemStatus {
-  id              String   @id @default(cuid())
-  lastRefreshAt   DateTime?
-  playerCount     Int      @default(0)
-  valuationCount  Int      @default(0)
-  pickCount       Int      @default(0)
-  version         String   @default("1.0.0")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String    @id @default(cuid())
+  lastRefreshAt  DateTime?
+  playerCount    Int       @default(0)
+  valuationCount Int       @default(0)
+  pickCount      Int       @default(0)
+  version        String    @default("1.0.0")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 // Refresh logs model
 model RefreshLog {
-  id          String   @id @default(cuid())
-  startedAt   DateTime @default(now())
-  completedAt DateTime?
-  durationMs  Int?
-  playerCount Int      @default(0)
-  valuationCount Int   @default(0)
-  pickCount   Int      @default(0)
-  status      String   @default("running") // running, completed, failed
-  error       String?
-  version     String   @default("1.0.0")
-}
-
-// App configuration model for admin tuning
-model AppConfig {
-  id          String   @id @default(cuid())
-  version     String   @unique // Version identifier
-  config      Json     // Full configuration object
-  isActive    Boolean  @default(false) // Only one config can be active
-  createdBy   String?  // Clerk user ID who created this config
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String    @id @default(cuid())
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  durationMs     Int?
+  playerCount    Int       @default(0)
+  valuationCount Int       @default(0)
+  pickCount      Int       @default(0)
+  status         String    @default("running") // running, completed, failed
+  error          String?
+  version        String    @default("1.0.0")
 }
 
 // Events model for observability and analytics
 model Event {
   id          String   @id @default(cuid())
-  eventType   String   // evaluate, save_trade, open_shared, settings_update
-  userId      String?  // Clerk user ID (nullable for anonymous)
-  anonId      String?  // Anonymous user identifier
-  payloadHash String?  // Hash of request payload for deduplication
-  durationMs  Int?     // Request duration in milliseconds
+  eventType   String // evaluate, save_trade, open_shared, settings_update
+  userId      String? // Clerk user ID (nullable for anonymous)
+  anonId      String? // Anonymous user identifier
+  payloadHash String? // Hash of request payload for deduplication
+  durationMs  Int? // Request duration in milliseconds
   createdAt   DateTime @default(now())
-  
+
   @@index([eventType])
   @@index([userId])
   @@index([createdAt])
@@ -215,15 +204,15 @@ model Event {
 
 // Team Profile model for context-aware trade advice
 model TeamProfile {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  timeline        String   @default("contend") // contend, retool, rebuild
-  riskTolerance   String   @default("medium")  // low, medium, high
-  leagueSettings  Json?    // Snapshot of league settings when profile was created
-  roster          Json     // Array of player IDs
-  ownedPicks      Json     // Array of pick IDs
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  timeline       String   @default("contend") // contend, retool, rebuild
+  riskTolerance  String   @default("medium") // low, medium, high
+  leagueSettings Json? // Snapshot of league settings when profile was created
+  roster         Json // Array of player IDs
+  ownedPicks     Json // Array of pick IDs
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -232,15 +221,15 @@ model TeamProfile {
 
 // League import models for Sleeper integration
 model League {
-  id              String   @id @default(cuid())
-  platform        String   @default("sleeper") // sleeper, espn, etc.
-  sleeperId       String   @unique // External league ID
-  name            String
-  season          String
-  settingsSnapshot Json?   // League settings when imported
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  lastSyncedAt    DateTime @default(now())
+  id               String   @id @default(cuid())
+  platform         String   @default("sleeper") // sleeper, espn, etc.
+  sleeperId        String   @unique // External league ID
+  name             String
+  season           String
+  settingsSnapshot Json? // League settings when imported
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  lastSyncedAt     DateTime @default(now())
 
   teams LeagueTeam[]
   picks LeaguePick[]
@@ -250,17 +239,17 @@ model League {
 }
 
 model LeagueTeam {
-  id            String   @id @default(cuid())
-  leagueId      String
-  sleeperId     String   // External team ID
-  displayName   String
-  userHandle    String?  // Sleeper username if available
-  metadataJson  Json?    // Additional team metadata
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  lastSyncedAt  DateTime @default(now())
+  id           String   @id @default(cuid())
+  leagueId     String
+  sleeperId    String // External team ID
+  displayName  String
+  userHandle   String? // Sleeper username if available
+  metadataJson Json? // Additional team metadata
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lastSyncedAt DateTime @default(now())
 
-  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  league League        @relation(fields: [leagueId], references: [id], onDelete: Cascade)
   roster LeagueRoster?
   picks  LeaguePick[]
 
@@ -269,11 +258,11 @@ model LeagueTeam {
 }
 
 model LeagueRoster {
-  id            String   @id @default(cuid())
-  leagueTeamId  String   @unique
-  playerIds     Json     // Array of player IDs (mapped by sleeperId)
-  unmatchedIds  Json     // Array of unmatched Sleeper player IDs
-  lastSyncedAt  DateTime @default(now())
+  id           String   @id @default(cuid())
+  leagueTeamId String   @unique
+  playerIds    Json // Array of player IDs (mapped by sleeperId)
+  unmatchedIds Json // Array of unmatched Sleeper player IDs
+  lastSyncedAt DateTime @default(now())
 
   team LeagueTeam @relation(fields: [leagueTeamId], references: [id], onDelete: Cascade)
 
@@ -283,13 +272,13 @@ model LeagueRoster {
 model LeaguePick {
   id            String   @id @default(cuid())
   leagueId      String
-  ownerId       String?  // leagueTeamId if owned by a team
+  ownerId       String? // leagueTeamId if owned by a team
   year          Int
   round         Int
-  originalOwner String?  // Original owner if traded
+  originalOwner String? // Original owner if traded
   createdAt     DateTime @default(now())
 
-  league League @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  league League      @relation(fields: [leagueId], references: [id], onDelete: Cascade)
   owner  LeagueTeam? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
 
   @@index([leagueId])
@@ -299,14 +288,14 @@ model LeaguePick {
 
 // Calibration runs for tuning the valuation engine
 model CalibrationRun {
-  id            String   @id @default(cuid())
-  status        String   // pending, running, completed, failed
-  parameters    Json     // CalibrationParameters
-  metrics       Json?    // CalibrationResult metrics
-  rankShifts    Json?    // Rank shift analysis
-  createdAt     DateTime @default(now())
-  completedAt   DateTime?
-  error         String?
+  id          String    @id @default(cuid())
+  status      String // pending, running, completed, failed
+  parameters  Json // CalibrationParameters
+  metrics     Json? // CalibrationResult metrics
+  rankShifts  Json? // Rank shift analysis
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+  error       String?
 
   @@index([status])
   @@index([createdAt])
@@ -314,29 +303,29 @@ model CalibrationRun {
 
 // Drift monitoring metrics
 model DriftMetrics {
-  id            String   @id @default(cuid())
-  overallRho    Float    // Overall Spearman correlation
-  positionRhos  Json     // Per-position correlations
-  jsDivergence  Float    // Jensen-Shannon divergence
-  topMovers     Json     // Top movers analysis
-  timestamp     DateTime @default(now())
+  id           String   @id @default(cuid())
+  overallRho   Float // Overall Spearman correlation
+  positionRhos Json // Per-position correlations
+  jsDivergence Float // Jensen-Shannon divergence
+  topMovers    Json // Top movers analysis
+  timestamp    DateTime @default(now())
 
   @@index([timestamp])
 }
 
 // Drift alerts
 model DriftAlert {
-  id          String    @id @default(cuid())
-  type        String    // correlation, divergence, movers
-  severity    String    // warning, critical
-  metric      String    // metric name
-  value       Float     // actual value
-  threshold   Float     // threshold value
-  position    String?   // position (if applicable)
-  message     String    // alert message
-  createdAt   DateTime  @default(now())
-  resolved    Boolean   @default(false)
-  resolvedAt  DateTime?
+  id         String    @id @default(cuid())
+  type       String // correlation, divergence, movers
+  severity   String // warning, critical
+  metric     String // metric name
+  value      Float // actual value
+  threshold  Float // threshold value
+  position   String? // position (if applicable)
+  message    String // alert message
+  createdAt  DateTime  @default(now())
+  resolved   Boolean   @default(false)
+  resolvedAt DateTime?
 
   @@index([type])
   @@index([severity])
@@ -348,7 +337,7 @@ model DriftAlert {
 model AppConfig {
   id                String    @id @default(cuid())
   version           String
-  config            Json      // Configuration parameters
+  config            Json // Configuration parameters
   isActive          Boolean   @default(false)
   isCandidate       Boolean   @default(false)
   rolloutPercentage Int       @default(0)
@@ -365,10 +354,10 @@ model AppConfig {
 // Admin actions log
 model AdminAction {
   id        String   @id @default(cuid())
-  action    String   // publish_config, rollback_config, etc.
+  action    String // publish_config, rollback_config, etc.
   configId  String?
   userId    String
-  details   Json?    // Additional action details
+  details   Json? // Additional action details
   createdAt DateTime @default(now())
 
   @@index([action])
