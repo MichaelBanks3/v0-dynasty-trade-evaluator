@@ -78,16 +78,20 @@ export async function POST(request: NextRequest) {
     const teamBAssetObjects = allAssets.filter(asset => teamBAssets.includes(asset.id))
 
     // Generate recommendations
-    const recommendations = generateRecommendations({
-      teamAAssets: teamAAssetObjects,
-      teamBAssets: teamBAssetObjects,
+    const recommendations = await generateRecommendations({
+      analysis: {
+        depthCoverage: {},
+        flags: {
+          qbGap: false,
+          criticalGaps: [],
+          thinDepth: []
+        }
+      },
+      teamAAssets: teamAAssets,
+      teamBAssets: teamBAssets,
       settings: settings || {},
-      teamProfile: teamProfile ? {
-        timeline: teamProfile.timeline,
-        riskTolerance: teamProfile.riskTolerance,
-        roster: teamProfile.roster ? JSON.parse(teamProfile.roster as string) : [],
-        ownedPicks: teamProfile.ownedPicks ? JSON.parse(teamProfile.ownedPicks as string) : []
-      } : null
+      timeline: teamProfile?.timeline || 'contend',
+      riskTolerance: teamProfile?.riskTolerance || 'medium'
     })
 
     // Track recommendation generation

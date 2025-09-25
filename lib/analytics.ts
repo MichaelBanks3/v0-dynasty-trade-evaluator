@@ -1,3 +1,5 @@
+import { prisma } from './db'
+
 // Event types for analytics
 export type EventType = 
   | 'evaluate'
