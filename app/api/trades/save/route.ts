@@ -26,6 +26,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = saveTradeSchema.parse(body)
 
+    // Ensure user exists in database
+    await prisma.user.upsert({
+      where: { id: userId },
+      update: {},
+      create: { id: userId }
+    })
+
     // Save trade to database
     const trade = await prisma.trade.create({
       data: {

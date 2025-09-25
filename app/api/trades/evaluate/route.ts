@@ -48,7 +48,6 @@ export async function POST(request: NextRequest) {
     const result = {
       totalA,
       totalB,
-      diff,
       verdict,
       teamAPlayers,
       teamBPlayers,
@@ -59,6 +58,13 @@ export async function POST(request: NextRequest) {
     const { userId } = await auth()
     if (userId) {
       try {
+        // Ensure user exists
+        await prisma.user.upsert({
+          where: { id: userId },
+          update: {},
+          create: { id: userId }
+        })
+
         await prisma.trade.create({
           data: {
             userId,

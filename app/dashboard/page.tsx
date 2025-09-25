@@ -24,6 +24,10 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (isSignedIn) {
+      // Ensure user exists in database (fire-and-forget)
+      fetch('/api/users/ensure', { method: 'POST' }).catch(() => {})
+      
+      // Fetch trades
       fetch('/api/trades/my-trades')
         .then(res => res.json())
         .then(data => setTrades(data))
@@ -35,7 +39,7 @@ export default function DashboardPage() {
   }, [isSignedIn])
 
   if (!isSignedIn) {
-  return (
+    return (
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
@@ -45,7 +49,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-        </div>
+      </div>
     )
   }
 
@@ -81,7 +85,7 @@ export default function DashboardPage() {
                     data-testid="back-home-button"
                   >
                     Back to Home
-                </Button>
+                  </Button>
                 </Link>
               </div>
             </CardContent>
@@ -90,12 +94,12 @@ export default function DashboardPage() {
           <div className="space-y-4" data-testid="my-trades">
             {trades.map(trade => (
               <Card key={trade.id}>
-            <CardHeader>
+                <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">
                       Trade #{trades.indexOf(trade) + 1}
                     </CardTitle>
-              <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2">
                       <Badge variant="outline">
                         {new Date(trade.createdAt).toLocaleDateString()}
                       </Badge>
@@ -127,10 +131,10 @@ export default function DashboardPage() {
                   <p className="text-sm text-muted-foreground mt-2">
                     Difference: {Math.abs(trade.totalA - trade.totalB)} points
                   </p>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
             ))}
-        </div>
+          </div>
         )}
       </div>
     </div>

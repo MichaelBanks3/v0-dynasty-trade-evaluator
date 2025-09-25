@@ -41,6 +41,13 @@ export default function TradePage() {
       .catch(console.error)
   }, [])
 
+  // Ensure user exists when signed in
+  useEffect(() => {
+    if (isSignedIn) {
+      fetch('/api/users/ensure', { method: 'POST' }).catch(() => {})
+    }
+  }, [isSignedIn])
+
   const handleSubmit = async () => {
     if (selectedTeamA.length === 0 && selectedTeamB.length === 0) {
       alert('Please select at least one player for one team')
