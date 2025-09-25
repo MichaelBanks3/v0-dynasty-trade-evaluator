@@ -4,6 +4,7 @@ import { TradeBuilder } from "@/components/TradeBuilder"
 import { TradeSummary } from "@/components/TradeSummary"
 import { AuthEnvBanner } from "@/components/AuthEnvBanner"
 import { useTradeStore } from "@/lib/store"
+import { safeArray } from "@/lib/safe"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
@@ -58,11 +59,15 @@ function TradePageContent() {
   const { teamAAssets, teamBAssets } = useTradeStore()
   const router = useRouter()
 
-  const teamATotal = teamAAssets?.reduce((sum: number, asset: any) => sum + asset.baseValue, 0) || 0
-  const teamBTotal = teamBAssets?.reduce((sum: number, asset: any) => sum + asset.baseValue, 0) || 0
+  // Safely get arrays and compute totals
+  const safeTeamAAssets = safeArray(teamAAssets)
+  const safeTeamBAssets = safeArray(teamBAssets)
+
+  const teamATotal = safeTeamAAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
+  const teamBTotal = safeTeamBAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
 
   const handleEvaluate = () => {
-    if ((teamAAssets?.length || 0) === 0 && (teamBAssets?.length || 0) === 0) {
+    if (safeTeamAAssets.length === 0 && safeTeamBAssets.length === 0) {
       alert("Please add at least one player or pick to one of the teams")
       return
     }
@@ -101,7 +106,7 @@ function TradePageContent() {
                   <Button 
                     onClick={handleEvaluate}
                     className="w-full"
-                    disabled={(teamAAssets?.length || 0) === 0 && (teamBAssets?.length || 0) === 0}
+                    disabled={safeTeamAAssets.length === 0 && safeTeamBAssets.length === 0}
                   >
                     Evaluate Trade
                   </Button>

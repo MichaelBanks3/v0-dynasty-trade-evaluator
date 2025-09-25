@@ -5,13 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { X } from "lucide-react"
 import { useTradeStore } from "@/lib/store"
+import { safeArray } from "@/lib/safe"
 import { PlayerSearch } from "./PlayerSearch"
 
 export function TradeBuilder() {
   const { teamAAssets, teamBAssets, removeAssetFromTeam } = useTradeStore()
 
-  const teamATotal = teamAAssets?.reduce((sum: number, asset: any) => sum + asset.baseValue, 0) || 0
-  const teamBTotal = teamBAssets?.reduce((sum: number, asset: any) => sum + asset.baseValue, 0) || 0
+  // Safely get arrays
+  const safeTeamAAssets = safeArray(teamAAssets)
+  const safeTeamBAssets = safeArray(teamBAssets)
+
+  const teamATotal = safeTeamAAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
+  const teamBTotal = safeTeamBAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
 
   return (
     <div className="space-y-8">
@@ -29,45 +34,45 @@ export function TradeBuilder() {
           </div>
         </CardHeader>
         <CardContent>
-          {(!teamAAssets || teamAAssets.length === 0) ? (
+          {safeTeamAAssets.length === 0 ? (
             <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
               <p className="text-muted-foreground">No assets yet</p>
               <p className="text-sm text-muted-foreground mt-1">Search and add players or picks above</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {teamAAssets.map((asset: any) => (
+              {safeTeamAAssets.map((asset: any) => (
                 <div
-                  key={asset.id}
+                  key={asset?.id || Math.random()}
                   className="flex items-center justify-between p-3 bg-accent rounded-lg"
-                  data-testid={`asset-${asset.id}`}
+                  data-testid={`asset-${asset?.id || 'unknown'}`}
                 >
                   <div className="flex items-center space-x-3">
                     <div>
-                      <p className="font-medium text-foreground">{asset.label}</p>
+                      <p className="font-medium text-foreground">{asset?.label || 'Unknown Asset'}</p>
                       <div className="flex items-center space-x-2 mt-1">
-                        <Badge variant={asset.type === "player" ? "default" : "secondary"} className="text-xs">
-                          {asset.type === "player" ? asset.position : "Pick"}
+                        <Badge variant={asset?.type === "player" ? "default" : "secondary"} className="text-xs">
+                          {asset?.type === "player" ? (asset?.position || 'Unknown') : "Pick"}
                         </Badge>
-                        {asset.type === "player" && (
+                        {asset?.type === "player" && (
                           <>
                             <Badge variant="outline" className="text-xs">
-                              {asset.team}
+                              {asset?.team || 'Unknown'}
                             </Badge>
-                            <span className="text-xs text-muted-foreground">Age {asset.age}</span>
+                            <span className="text-xs text-muted-foreground">Age {asset?.age || 'Unknown'}</span>
                           </>
                         )}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-muted-foreground">{asset.baseValue}</span>
+                    <span className="text-sm font-medium text-muted-foreground">{asset?.baseValue || 0}</span>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => removeAssetFromTeam("A", asset.id)}
+                      onClick={() => asset?.id && removeAssetFromTeam("A", asset.id)}
                       className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
-                      data-testid={`remove-${asset.id}`}
+                      data-testid={`remove-${asset?.id || 'unknown'}`}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -90,45 +95,45 @@ export function TradeBuilder() {
           </div>
         </CardHeader>
         <CardContent>
-          {(!teamBAssets || teamBAssets.length === 0) ? (
+          {safeTeamBAssets.length === 0 ? (
             <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
               <p className="text-muted-foreground">No assets yet</p>
               <p className="text-sm text-muted-foreground mt-1">Search and add players or picks above</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {teamBAssets.map((asset: any) => (
+              {safeTeamBAssets.map((asset: any) => (
                 <div
-                  key={asset.id}
+                  key={asset?.id || Math.random()}
                   className="flex items-center justify-between p-3 bg-accent rounded-lg"
-                  data-testid={`asset-${asset.id}`}
+                  data-testid={`asset-${asset?.id || 'unknown'}`}
                 >
                   <div className="flex items-center space-x-3">
                     <div>
-                      <p className="font-medium text-foreground">{asset.label}</p>
+                      <p className="font-medium text-foreground">{asset?.label || 'Unknown Asset'}</p>
                       <div className="flex items-center space-x-2 mt-1">
-                        <Badge variant={asset.type === "player" ? "default" : "secondary"} className="text-xs">
-                          {asset.type === "player" ? asset.position : "Pick"}
+                        <Badge variant={asset?.type === "player" ? "default" : "secondary"} className="text-xs">
+                          {asset?.type === "player" ? (asset?.position || 'Unknown') : "Pick"}
                         </Badge>
-                        {asset.type === "player" && (
+                        {asset?.type === "player" && (
                           <>
                             <Badge variant="outline" className="text-xs">
-                              {asset.team}
+                              {asset?.team || 'Unknown'}
                             </Badge>
-                            <span className="text-xs text-muted-foreground">Age {asset.age}</span>
+                            <span className="text-xs text-muted-foreground">Age {asset?.age || 'Unknown'}</span>
                           </>
                         )}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-muted-foreground">{asset.baseValue}</span>
+                    <span className="text-sm font-medium text-muted-foreground">{asset?.baseValue || 0}</span>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => removeAssetFromTeam("B", asset.id)}
+                      onClick={() => asset?.id && removeAssetFromTeam("B", asset.id)}
                       className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
-                      data-testid={`remove-${asset.id}`}
+                      data-testid={`remove-${asset?.id || 'unknown'}`}
                     >
                       <X className="h-4 w-4" />
                     </Button>

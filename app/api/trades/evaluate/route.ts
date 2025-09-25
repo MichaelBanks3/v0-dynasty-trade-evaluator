@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
+import { safeArray } from '@/lib/safe'
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -9,13 +10,13 @@ const FAIRNESS_THRESHOLD = 50
 
 export async function POST(request: NextRequest) {
   try {
-    const { teamA, teamB } = await request.json()
+    const body = await request.json()
+    
+    // Safely extract and validate arrays
+    const teamA = safeArray(body?.teamA)
+    const teamB = safeArray(body?.teamB)
 
     // Validate input
-    if (!Array.isArray(teamA) || !Array.isArray(teamB)) {
-      return NextResponse.json({ error: 'Invalid input format' }, { status: 400 })
-    }
-
     if (teamA.length === 0 && teamB.length === 0) {
       return NextResponse.json({ error: 'At least one team must have players' }, { status: 400 })
     }
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     const playerMap = new Map(players.map(p => [p.id, p]))
 
-    // Calculate totals
+    // Calculate totals safely
     const totalA = teamA.reduce((sum, id) => sum + (playerMap.get(id)?.value || 0), 0)
     const totalB = teamB.reduce((sum, id) => sum + (playerMap.get(id)?.value || 0), 0)
     const diff = Math.abs(totalA - totalB)
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
       verdict = totalA > totalB ? 'FAVORS_A' : 'FAVORS_B'
     }
 
-    // Get player details for response
+    // Get player details for response safely
     const teamAPlayers = teamA.map(id => playerMap.get(id)).filter(Boolean)
     const teamBPlayers = teamB.map(id => playerMap.get(id)).filter(Boolean)
 

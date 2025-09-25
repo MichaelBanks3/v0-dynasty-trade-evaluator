@@ -2,6 +2,7 @@
 
 import { useTradeStore } from "@/lib/store"
 import { TradeResultCard } from "@/components/TradeResultCard"
+import { safeArray } from "@/lib/safe"
 import { Button } from "@/components/ui/button"
 import { AlertCircle } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -35,8 +36,12 @@ function TradeResultPageContent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Safely get arrays
+  const safeTeamAAssets = safeArray(teamAAssets)
+  const safeTeamBAssets = safeArray(teamBAssets)
+
   useEffect(() => {
-    if ((teamAAssets?.length || 0) === 0 && (teamBAssets?.length || 0) === 0) {
+    if (safeTeamAAssets.length === 0 && safeTeamBAssets.length === 0) {
       return
     }
 
@@ -44,8 +49,8 @@ function TradeResultPageContent() {
     setError(null)
 
     // Create a mock result for now since we're using the store data
-    const teamATotal = teamAAssets?.reduce((sum: number, asset: any) => sum + asset.baseValue, 0) || 0
-    const teamBTotal = teamBAssets?.reduce((sum: number, asset: any) => sum + asset.baseValue, 0) || 0
+    const teamATotal = safeTeamAAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
+    const teamBTotal = safeTeamBAssets.reduce((sum: number, asset: any) => sum + (asset?.baseValue || 0), 0)
     const difference = Math.abs(teamATotal - teamBTotal)
     
     let verdict = "FAIR"
@@ -54,20 +59,20 @@ function TradeResultPageContent() {
     }
 
     // Convert store assets to the format expected by TradeResultCard
-    const teamAPlayers = (teamAAssets || []).map((asset: any) => ({
-      id: parseInt(asset.id),
-      name: asset.label,
-      position: asset.type === "player" ? asset.position : "PICK",
-      team: asset.type === "player" ? asset.team : "DRAFT",
-      value: asset.baseValue
+    const teamAPlayers = safeTeamAAssets.map((asset: any) => ({
+      id: parseInt(asset?.id || '0'),
+      name: asset?.label || 'Unknown Asset',
+      position: asset?.type === "player" ? (asset?.position || 'Unknown') : "PICK",
+      team: asset?.type === "player" ? (asset?.team || 'Unknown') : "DRAFT",
+      value: asset?.baseValue || 0
     }))
 
-    const teamBPlayers = (teamBAssets || []).map((asset: any) => ({
-      id: parseInt(asset.id),
-      name: asset.label,
-      position: asset.type === "player" ? asset.position : "PICK",
-      team: asset.type === "player" ? asset.team : "DRAFT",
-      value: asset.baseValue
+    const teamBPlayers = safeTeamBAssets.map((asset: any) => ({
+      id: parseInt(asset?.id || '0'),
+      name: asset?.label || 'Unknown Asset',
+      position: asset?.type === "player" ? (asset?.position || 'Unknown') : "PICK",
+      team: asset?.type === "player" ? (asset?.team || 'Unknown') : "DRAFT",
+      value: asset?.baseValue || 0
     }))
 
     const mockResult = {
@@ -81,9 +86,9 @@ function TradeResultPageContent() {
 
     setResult(mockResult)
     setLoading(false)
-  }, [teamAAssets, teamBAssets])
+  }, [safeTeamAAssets, safeTeamBAssets])
 
-  if ((teamAAssets?.length || 0) === 0 && (teamBAssets?.length || 0) === 0) {
+  if (safeTeamAAssets.length === 0 && safeTeamBAssets.length === 0) {
     return (
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">

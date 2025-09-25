@@ -1,4 +1,5 @@
 import { create } from "zustand"
+import { safeArray } from "./safe"
 import type { Player } from "@/data/mockPlayers"
 import type { Pick } from "@/data/mockPicks"
 
@@ -29,30 +30,28 @@ export const useTradeStore = create<TradeState>((set, get) => ({
   },
 
   addAssetToTeam: (team, asset) => {
-    set((state) => {
-      const key = team === "A" ? "teamAAssets" : "teamBAssets"
-      const currentAssets = state[key]
+    const key = team === "A" ? "teamAAssets" : "teamBAssets"
+    const currentAssets = safeArray(get()[key])
 
-      // Prevent duplicates
-      if (currentAssets.some((a) => a.id === asset.id)) {
-        return state
-      }
+    // Prevent duplicates
+    if (currentAssets.some((a) => a?.id === asset?.id)) {
+      return
+    }
 
-      return {
-        ...state,
-        [key]: [...currentAssets, asset],
-      }
-    })
+    set((state) => ({
+      ...state,
+      [key]: [...currentAssets, asset],
+    }))
   },
 
   removeAssetFromTeam: (team, assetId) => {
-    set((state) => {
-      const key = team === "A" ? "teamAAssets" : "teamBAssets"
-      return {
-        ...state,
-        [key]: state[key].filter((asset) => asset.id !== assetId),
-      }
-    })
+    const key = team === "A" ? "teamAAssets" : "teamBAssets"
+    const currentAssets = safeArray(get()[key])
+
+    set((state) => ({
+      ...state,
+      [key]: currentAssets.filter((asset) => asset?.id !== assetId),
+    }))
   },
 
   updateLeagueSettings: (settings) => {
@@ -63,31 +62,16 @@ export const useTradeStore = create<TradeState>((set, get) => ({
   },
 
   clearTrade: () => {
-    set({
+    set((state) => ({
+      ...state,
       teamAAssets: [],
       teamBAssets: [],
-    })
+    }))
   },
 
   getTeamTotal: (team) => {
-    const state = get()
-    const assets = team === "A" ? state.teamAAssets : state.teamBAssets
-    const { superflex, tePremium } = state.leagueSettings
-
-    return assets.reduce((total, asset) => {
-      let value = asset.baseValue
-
-      // Apply league setting modifiers
-      if ("position" in asset) {
-        if (superflex && asset.position === "QB") {
-          value *= 1.2 // 20% boost for QBs in superflex
-        }
-        if (tePremium && asset.position === "TE") {
-          value *= 1.15 // 15% boost for TEs in TE premium
-        }
-      }
-
-      return total + value
-    }, 0)
+    const key = team === "A" ? "teamAAssets" : "teamBAssets"
+    const assets = safeArray(get()[key])
+    return assets.reduce((sum, asset) => sum + (asset?.baseValue || 0), 0)
   },
 }))
