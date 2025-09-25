@@ -3,6 +3,8 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 import { X } from "lucide-react"
 import { useTradeStore, type Asset } from "@/lib/store"
 import { safeArray } from "@/lib/safe"
@@ -14,9 +16,11 @@ export function TradeBuilder() {
     teamAAssets, 
     teamBAssets, 
     activeSide,
+    leagueSettings,
     removeAssetFromTeam, 
     setActiveSide,
-    addAssetToTeam
+    addAssetToTeam,
+    updateLeagueSettings
   } = useTradeStore()
 
   // Safely get arrays
@@ -101,6 +105,43 @@ export function TradeBuilder() {
           </div>
         </div>
       )}
+
+      {/* League Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>League Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="superflex">Superflex</Label>
+                <p className="text-sm text-muted-foreground">
+                  QBs can be played in the flex position
+                </p>
+              </div>
+              <Switch
+                id="superflex"
+                checked={leagueSettings.superflex}
+                onCheckedChange={(checked) => updateLeagueSettings({ superflex: checked })}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="te-premium">TE Premium</Label>
+                <p className="text-sm text-muted-foreground">
+                  Tight ends receive bonus points
+                </p>
+              </div>
+              <Switch
+                id="te-premium"
+                checked={leagueSettings.tePremium}
+                onCheckedChange={(checked) => updateLeagueSettings({ tePremium: checked })}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Active Side Control */}
       <div className="flex items-center gap-4">

@@ -32,7 +32,7 @@ function normalizeAsset(apiAsset: any): Asset {
       id: apiAsset.id,
       kind: "player",
       label: apiAsset.label,
-      value: apiAsset.value,
+      value: apiAsset.baseValue || apiAsset.value,
       meta: {
         position: apiAsset.position,
         team: apiAsset.team,
@@ -110,17 +110,13 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
   const handleAdd = (asset: Asset, targetTeam: "A" | "B") => {
     console.log("[ADD] Starting add process", { assetId: asset.id, targetTeam })
     
-    // Read current state at call time (not stale closure)
-    const currentActiveSide = useTradeStore.getState().activeSide
-    const currentIsAssetInAnyTeam = useTradeStore.getState().isAssetInAnyTeam
-    
     console.log("[ADD] Current state", { 
-      currentActiveSide, 
+      activeSide, 
       targetTeam, 
-      isAlreadyAdded: currentIsAssetInAnyTeam(asset.id) 
+      isAlreadyAdded: isAssetInAnyTeam(asset.id) 
     })
     
-    if (currentIsAssetInAnyTeam(asset.id)) {
+    if (isAssetInAnyTeam(asset.id)) {
       console.log("[ADD] Asset already added, showing toast")
       showToast("This player/pick is already on a team")
       return
@@ -253,8 +249,7 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
                                       e.preventDefault()
                                       e.stopPropagation()
                                       console.log("[ADD] Primary button clicked")
-                                      const currentActiveSide = useTradeStore.getState().activeSide
-                                      handleAdd(asset, currentActiveSide)
+                                      handleAdd(asset, activeSide)
                                     }}
                                     data-testid={`add-${asset.id}-${activeSide.toLowerCase()}`}
                                   >

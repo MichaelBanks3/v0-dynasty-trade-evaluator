@@ -58,8 +58,8 @@ const createTradeStore = () => {
       console.log("[STORE] addAssetToTeam called", { team, assetId: asset.id, assetLabel: asset.label })
       
       const currentState = get()
-      const currentAssets = safeArray(currentState.teamAAssets)
-      const otherAssets = safeArray(currentState.teamBAssets)
+      const currentAssets = team === "A" ? safeArray(currentState.teamAAssets) : safeArray(currentState.teamBAssets)
+      const otherAssets = team === "A" ? safeArray(currentState.teamBAssets) : safeArray(currentState.teamAAssets)
 
       console.log("[STORE] Current state", { 
         currentTeamAssets: currentAssets.length, 
@@ -175,6 +175,7 @@ const createTradeStore = () => {
     },
 
     updateLeagueSettings: (settings) => {
+      console.log("[STORE] updateLeagueSettings called", { settings })
       set((state) => ({
         ...state,
         leagueSettings: { ...state.leagueSettings, ...settings },
