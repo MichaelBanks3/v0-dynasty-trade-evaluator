@@ -8,7 +8,8 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest) {
-  const { userId } = await auth()
+  const authResult = await auth()
+  const userId = authResult?.userId
   
   try {
     const body = await request.json()
@@ -26,8 +27,10 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Convert string IDs to numbers for Prisma queries
+    const allAssetIds = [...teamAAssets, ...teamBAssets].map(id => parseInt(id)).filter(id => !isNaN(id))
+    
     // Get current valuations for all assets
-    const allAssetIds = [...teamAAssets, ...teamBAssets]
     const valuations = await prisma.valuation.findMany({
       where: {
         playerId: { in: allAssetIds },
@@ -50,7 +53,7 @@ export async function POST(request: NextRequest) {
     // Combine players and picks
     const allAssets = [
       ...valuations.map(v => ({
-        id: v.playerId,
+        id: v.playerId.toString(),
         type: 'player' as const,
         name: v.player?.name || 'Unknown Player',
         position: v.player?.position || 'UNKNOWN',
@@ -61,7 +64,7 @@ export async function POST(request: NextRequest) {
         composite: (v.nowScore || 0) + (v.futureScore || 0)
       })),
       ...picks.map(p => ({
-        id: p.id,
+        id: p.id.toString(),
         type: 'pick' as const,
         name: `${p.year} Round ${p.round}`,
         position: 'PICK',
@@ -77,21 +80,28 @@ export async function POST(request: NextRequest) {
     const teamAAssetObjects = allAssets.filter(asset => teamAAssets.includes(asset.id))
     const teamBAssetObjects = allAssets.filter(asset => teamBAssets.includes(asset.id))
 
-    // Generate recommendations
+    // Generate recommendations with proper types
     const recommendations = await generateRecommendations({
       analysis: {
-        depthCoverage: {},
+        depthCoverage: {
+          QB: 1.0,
+          RB: 1.0,
+          WR: 1.0,
+          TE: 1.0
+        },
         flags: {
           qbGap: false,
           criticalGaps: [],
-          thinDepth: []
+          thinDepth: [],
+          riskFlags: [],
+          ageSkew: []
         }
       },
       teamAAssets: teamAAssets,
       teamBAssets: teamBAssets,
       settings: settings || {},
-      timeline: teamProfile?.timeline || 'contend',
-      riskTolerance: teamProfile?.riskTolerance || 'medium'
+      timeline: (teamProfile?.timeline as 'contend' | 'retool' | 'rebuild') || 'contend',
+      riskTolerance: (teamProfile?.riskTolerance as 'low' | 'medium' | 'high') || 'medium'
     })
 
     // Track recommendation generation
