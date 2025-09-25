@@ -5,11 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { X } from "lucide-react"
+import { X, Trash2, Users, Calendar } from "lucide-react"
 import { useTradeStore, type Asset } from "@/lib/store"
 import { safeArray } from "@/lib/safe"
 import { PlayerSearch } from "./PlayerSearch"
 import { ActiveSideControl } from "./ActiveSideControl"
+import { trackEvent, generatePayloadHash } from "@/lib/analytics"
+import { useEffect, useRef } from "react"
 
 export function TradeBuilder() {
   const { 
@@ -23,9 +25,45 @@ export function TradeBuilder() {
     updateLeagueSettings
   } = useTradeStore()
 
+  const searchRef = useRef<HTMLInputElement>(null)
+
   // Safely get arrays
   const safeTeamAAssets = safeArray(teamAAssets)
   const safeTeamBAssets = safeArray(teamBAssets)
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Focus search with /
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        searchRef.current?.focus()
+      }
+      
+      // Switch active side with 1/2
+      if (e.key === '1' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        setActiveSide('A')
+      }
+      if (e.key === '2' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        setActiveSide('B')
+      }
+      
+      // Remove last asset with Backspace when search is empty
+      if (e.key === 'Backspace' && !searchRef.current?.value) {
+        e.preventDefault()
+        const currentAssets = activeSide === 'A' ? safeTeamAAssets : safeTeamBAssets
+        if (currentAssets.length > 0) {
+          const lastAsset = currentAssets[currentAssets.length - 1]
+          removeAssetFromTeam(activeSide, lastAsset.id)
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [activeSide, safeTeamAAssets, safeTeamBAssets, removeAssetFromTeam, setActiveSide])
 
   // Debug logging for renders
   console.log("RENDER A/B", safeTeamAAssets.length, safeTeamBAssets.length)
@@ -41,6 +79,23 @@ export function TradeBuilder() {
   const handleAssetAdded = (asset: Asset, team: "A" | "B") => {
     // Asset was successfully added, no additional action needed
     console.log(`[CALLBACK] Added ${asset.label} to Team ${team}`)
+  }
+
+  const clearSide = async (team: "A" | "B") => {
+    const assets = team === 'A' ? safeTeamAAssets : safeTeamBAssets
+    assets.forEach(asset => {
+      removeAssetFromTeam(team, asset.id)
+    })
+
+    // Track clear side action
+    await trackEvent('remove_asset', {
+      payloadHash: generatePayloadHash({ action: 'clear_side', team, count: assets.length })
+    })
+  }
+
+  const isAssetDuplicate = (assetId: string) => {
+    return safeTeamAAssets.some(asset => asset.id === assetId) || 
+           safeTeamBAssets.some(asset => asset.id === assetId)
   }
 
   // Debug button handlers
@@ -150,12 +205,19 @@ export function TradeBuilder() {
       </div>
 
       {/* Player Search */}
-      <PlayerSearch onAssetAdded={handleAssetAdded} />
+      <PlayerSearch 
+        onAssetAdded={handleAssetAdded} 
+        searchRef={searchRef}
+        isAssetDuplicate={isAssetDuplicate}
+      />
 
       {/* Team A */}
       <Card 
         data-testid="team-a-builder"
         className={`transition-colors ${activeSide === "A" ? "ring-2 ring-primary ring-offset-2" : ""}`}
+        role="region"
+        aria-label="Team A trade builder"
+        aria-selected={activeSide === "A"}
       >
         <CardHeader 
           className="cursor-pointer"
@@ -163,9 +225,25 @@ export function TradeBuilder() {
         >
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Team A</CardTitle>
-            <Badge variant="outline" className="text-sm font-medium" data-testid="team-a-total">
-              Total: {Math.round(teamATotal)}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-sm font-medium" data-testid="team-a-total">
+                Total: {Math.round(teamATotal)}
+              </Badge>
+              {safeTeamAAssets.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    clearSide('A')
+                  }}
+                  className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
+                  title="Clear Team A"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -178,12 +256,20 @@ export function TradeBuilder() {
               <p className="text-sm text-muted-foreground mt-1">Search and add players or picks above</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3" role="list" aria-label="Team A assets">
               {safeTeamAAssets.map((asset: Asset) => (
                 <div
                   key={asset.id}
                   className="flex items-center justify-between p-3 bg-accent rounded-lg"
                   data-testid={`asset-${asset.id}`}
+                  role="listitem"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Delete' || e.key === 'Backspace') {
+                      e.preventDefault()
+                      removeAssetFromTeam('A', asset.id)
+                    }
+                  }}
                 >
                   <div className="flex items-center space-x-3">
                     <div>
@@ -235,6 +321,9 @@ export function TradeBuilder() {
       <Card 
         data-testid="team-b-builder"
         className={`transition-colors ${activeSide === "B" ? "ring-2 ring-primary ring-offset-2" : ""}`}
+        role="region"
+        aria-label="Team B trade builder"
+        aria-selected={activeSide === "B"}
       >
         <CardHeader 
           className="cursor-pointer"
@@ -242,9 +331,25 @@ export function TradeBuilder() {
         >
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Team B</CardTitle>
-            <Badge variant="outline" className="text-sm font-medium" data-testid="team-b-total">
-              Total: {Math.round(teamBTotal)}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-sm font-medium" data-testid="team-b-total">
+                Total: {Math.round(teamBTotal)}
+              </Badge>
+              {safeTeamBAssets.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    clearSide('B')
+                  }}
+                  className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
+                  title="Clear Team B"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -257,12 +362,20 @@ export function TradeBuilder() {
               <p className="text-sm text-muted-foreground mt-1">Search and add players or picks above</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3" role="list" aria-label="Team B assets">
               {safeTeamBAssets.map((asset: Asset) => (
                 <div
                   key={asset.id}
                   className="flex items-center justify-between p-3 bg-accent rounded-lg"
                   data-testid={`asset-${asset.id}`}
+                  role="listitem"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Delete' || e.key === 'Backspace') {
+                      e.preventDefault()
+                      removeAssetFromTeam('B', asset.id)
+                    }
+                  }}
                 >
                   <div className="flex items-center space-x-3">
                     <div>

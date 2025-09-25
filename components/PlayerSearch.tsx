@@ -9,9 +9,12 @@ import { Search, Plus, ChevronDown, X } from "lucide-react"
 import { useTradeStore, type Asset } from "@/lib/store"
 import { safeArray } from "@/lib/safe"
 import { useToast } from "./Toast"
+import { trackEvent, generatePayloadHash } from "@/lib/analytics"
 
 interface PlayerSearchProps {
   onAssetAdded?: (asset: Asset, team: "A" | "B") => void
+  searchRef?: React.RefObject<HTMLInputElement>
+  isAssetDuplicate?: (assetId: string) => boolean
 }
 
 // Normalize API response to our Asset shape
@@ -21,10 +24,10 @@ function normalizeAsset(apiAsset: any): Asset {
       id: apiAsset.id,
       kind: "pick",
       label: apiAsset.label,
-      value: apiAsset.value,
+      value: apiAsset.value || 0,
       meta: {
-        year: parseInt(apiAsset.label.split(' ')[0]) || new Date().getFullYear(),
-        round: parseInt(apiAsset.label.split(' ')[2]) || 1
+        year: apiAsset.meta?.year || parseInt(apiAsset.label.split(' ')[0]) || new Date().getFullYear(),
+        round: apiAsset.meta?.round || parseInt(apiAsset.label.split(' ')[2]) || 1
       }
     }
   } else {
@@ -32,17 +35,17 @@ function normalizeAsset(apiAsset: any): Asset {
       id: apiAsset.id,
       kind: "player",
       label: apiAsset.label,
-      value: apiAsset.baseValue || apiAsset.value,
+      value: apiAsset.value || 0,
       meta: {
-        position: apiAsset.position,
-        team: apiAsset.team,
-        age: apiAsset.age
+        position: apiAsset.meta?.position || apiAsset.position,
+        team: apiAsset.meta?.team || apiAsset.team,
+        age: apiAsset.meta?.age || apiAsset.age
       }
     }
   }
 }
 
-export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
+export function PlayerSearch({ onAssetAdded, searchRef, isAssetDuplicate }: PlayerSearchProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [isOpen, setIsOpen] = useState(false)
   const [searchResults, setSearchResults] = useState<Asset[]>([])
@@ -64,13 +67,18 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
 
       setIsLoading(true)
       try {
-        const response = await fetch(`/api/players?q=${encodeURIComponent(query)}`)
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
         const data = await response.json()
         
         // Safely handle the response and normalize assets
         const results = safeArray(data).map(normalizeAsset)
         setSearchResults(results)
         setHasSearched(true)
+
+        // Track search query
+        await trackEvent('search_query', {
+          payloadHash: generatePayloadHash({ queryLength: query.length })
+        })
       } catch (error) {
         console.error('Error searching players:', error)
         setSearchResults([])
@@ -91,7 +99,7 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
   useEffect(() => {
     const loadPopularPlayers = async () => {
       try {
-        const response = await fetch('/api/players')
+        const response = await fetch('/api/search?q=a')
         const data = await response.json()
         const results = safeArray(data).map(normalizeAsset)
         setSearchResults(results.slice(0, 10)) // Show top 10 popular players
@@ -133,6 +141,11 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
       onAssetAdded?.(asset, targetTeam)
       setSearchTerm("")
       setIsOpen(false)
+
+      // Track asset add
+      trackEvent('add_asset', {
+        payloadHash: generatePayloadHash({ assetId: asset.id, assetType: asset.kind })
+      })
     } else {
       console.log("[ADD] Failed - showing error toast")
       showToast("Cannot add—unknown error")
@@ -181,7 +194,8 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
           <div className="space-y-4">
             <div className="relative">
               <Input
-                placeholder="Search for players or picks..."
+                ref={searchRef}
+                placeholder="Search for players or picks... (Press / to focus)"
                 value={searchTerm}
                 onChange={handleInputChange}
                 onFocus={handleInputFocus}
@@ -198,7 +212,7 @@ export function PlayerSearch({ onAssetAdded }: PlayerSearchProps) {
                   ) : searchResults.length > 0 ? (
                     <div className="p-2 space-y-1">
                       {searchResults.map((asset) => {
-                        const isAlreadyAdded = isAssetInAnyTeam(asset.id)
+                        const isAlreadyAdded = isAssetDuplicate?.(asset.id) || isAssetInAnyTeam(asset.id)
                         const isDropdownOpen = showDropdown === asset.id
                         
                         return (

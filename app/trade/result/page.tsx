@@ -1,11 +1,22 @@
 "use client"
 
 import { useTradeStore, type Asset } from "@/lib/store"
-import { TradeResultCard } from "@/components/TradeResultCard"
+import { TradeResultCardV2 } from "@/components/TradeResultCardV2"
+import { ResultsHeader } from "@/components/ResultsHeader"
+import { BalancingSuggestion } from "@/components/BalancingSuggestion"
+import { FeedbackWidget } from "@/components/FeedbackWidget"
+import { AdvisorWithRecommendations } from "@/components/AdvisorPanel"
+import { LeagueBenchmarkChips } from "@/components/LeagueBenchmarkChips"
+import { WinNowFutureChart } from "@/components/WinNowFutureChart"
+import { TradeSummary } from "@/components/TradeSummary"
+import { SettingsDrawer } from "@/components/SettingsDrawer"
+import { ActiveSettings } from "@/components/ActiveSettings"
 import { safeArray } from "@/lib/safe"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { AlertCircle } from "lucide-react"
 import { useEffect, useState } from "react"
+import { LeagueSettings, DEFAULT_SETTINGS } from "@/lib/settings"
 
 export default function TradeResultPage() {
   const [mounted, setMounted] = useState(false)
@@ -34,6 +45,8 @@ function TradeResultPageContent() {
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [settings, setSettings] = useState<LeagueSettings>(DEFAULT_SETTINGS)
+  const [leagueInfo, setLeagueInfo] = useState<{ leagueId?: string; teamId?: string } | null>(null)
 
   // Use store selectors directly for reactivity
   const teamAAssets = useTradeStore((state: any) => state.teamAAssets)
@@ -51,45 +64,62 @@ function TradeResultPageContent() {
     setLoading(true)
     setError(null)
 
-    // Create a mock result for now since we're using the store data
-    const teamATotal = safeTeamAAssets.reduce((sum: number, asset: any) => sum + (asset?.value || 0), 0)
-    const teamBTotal = safeTeamBAssets.reduce((sum: number, asset: any) => sum + (asset?.value || 0), 0)
-    const difference = Math.abs(teamATotal - teamBTotal)
-    
-    let verdict = "FAIR"
-    if (difference > 50) {
-      verdict = teamATotal > teamBTotal ? "FAVORS_A" : "FAVORS_B"
+    // Call the proper evaluation API
+    const evaluateTrade = async () => {
+      try {
+        // Use asset IDs directly for the new evaluation API
+
+        const response = await fetch('/api/evaluate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            teamA: safeTeamAAssets.map((asset: any) => asset.id),
+            teamB: safeTeamBAssets.map((asset: any) => asset.id),
+            settings: settings
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to evaluate trade')
+        }
+
+        const evaluationResult = await response.json()
+        setResult(evaluationResult)
+      } catch (error) {
+        console.error('Error evaluating trade:', error)
+        setError('Failed to evaluate trade. Please try again.')
+      } finally {
+        setLoading(false)
+      }
     }
 
-    // Convert normalized assets to the format expected by TradeResultCard
-    const teamAPlayers = safeTeamAAssets.map((asset: any) => ({
-      id: parseInt(asset.id) || 0,
-      name: asset.label,
-      position: asset.kind === "player" ? (asset.meta?.position || 'Unknown') : "PICK",
-      team: asset.kind === "player" ? (asset.meta?.team || 'Unknown') : "DRAFT",
-      value: asset.value
-    }))
+    evaluateTrade()
+  }, [safeTeamAAssets, safeTeamBAssets, settings])
 
-    const teamBPlayers = safeTeamBAssets.map((asset: any) => ({
-      id: parseInt(asset.id) || 0,
-      name: asset.label,
-      position: asset.kind === "player" ? (asset.meta?.position || 'Unknown') : "PICK",
-      team: asset.kind === "player" ? (asset.meta?.team || 'Unknown') : "DRAFT",
-      value: asset.value
-    }))
-
-    const mockResult = {
-      totalA: teamATotal,
-      totalB: teamBTotal,
-      verdict: verdict,
-      teamAPlayers: teamAPlayers,
-      teamBPlayers: teamBPlayers,
-      saved: false
+  // Fetch league information from team profile
+  useEffect(() => {
+    const fetchLeagueInfo = async () => {
+      try {
+        const response = await fetch('/api/team/profile')
+        if (response.ok) {
+          const profile = await response.json()
+          // Check if profile has league information
+          if (profile.leagueId && profile.teamId) {
+            setLeagueInfo({
+              leagueId: profile.leagueId,
+              teamId: profile.teamId
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching league info:', error)
+      }
     }
 
-    setResult(mockResult)
-    setLoading(false)
-  }, [safeTeamAAssets, safeTeamBAssets])
+    fetchLeagueInfo()
+  }, [])
 
   if (safeTeamAAssets.length === 0 && safeTeamBAssets.length === 0) {
   return (
@@ -151,17 +181,105 @@ function TradeResultPageContent() {
             <Button asChild>
               <a href="/trade">Try Again</a>
               </Button>
-          </div>
-        </div>
-      </div>
+                  </div>
+                </div>
+              </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-background p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Trade Evaluation Results</h1>
-        <TradeResultCard result={result} />
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">Trade Evaluation Results</h1>
+          <SettingsDrawer onSettingsChange={setSettings} currentSettings={settings} />
+        </div>
+        
+        <div className="mb-6">
+          <ActiveSettings settings={settings} />
+        </div>
+
+        {/* Results Header */}
+        <ResultsHeader
+          verdict={result.verdict}
+          teamANow={result.totals.teamA.nowScore}
+          teamAFuture={result.totals.teamA.futureScore}
+          teamBNow={result.totals.teamB.nowScore}
+          teamBFuture={result.totals.teamB.futureScore}
+          teamAComposite={result.totals.teamA.compositeValue}
+          teamBComposite={result.totals.teamB.compositeValue}
+          explanation={result.explanation}
+        />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Trade Details */}
+          <div className="space-y-6">
+            <TradeResultCardV2 result={result} settings={settings} />
+            
+            {/* Balancing Suggestion */}
+            <BalancingSuggestion
+              suggestion={result.suggestion}
+              delta={Math.abs(result.totals.teamA.compositeValue - result.totals.teamB.compositeValue) / Math.max(result.totals.teamA.compositeValue, result.totals.teamB.compositeValue)}
+            />
+
+            {/* Feedback Widget */}
+            <FeedbackWidget 
+              tradeSlug={result.slug}
+              settingsHash={settings ? JSON.stringify(settings) : undefined}
+            />
+
+            {/* League Benchmark Chips */}
+            {leagueInfo && (
+              <LeagueBenchmarkChips
+                leagueId={leagueInfo.leagueId}
+                teamId={leagueInfo.teamId}
+              />
+            )}
+
+            {/* Trade Finder CTA */}
+            {leagueInfo && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold">Find Trades vs Opponents</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Get personalized trade proposals based on your league
+                      </p>
+                    </div>
+                    <Button asChild>
+                      <a href={`/league/${leagueInfo.leagueId}?findTrades=true`}>
+                        Find Trades
+                      </a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+              {/* Advisor Panel */}
+              <AdvisorWithRecommendations
+                teamAAssets={safeTeamAAssets.map((asset: any) => asset.id)}
+                teamBAssets={safeTeamBAssets.map((asset: any) => asset.id)}
+                settings={settings}
+              />
+            </div>
+          
+          {/* Right Column - Analysis */}
+          <div className="space-y-6">
+            {/* Fairness Analysis */}
+            <TradeSummary 
+              teamATotal={result.totalA} 
+              teamBTotal={result.totalB} 
+            />
+            
+            {/* Win-Now vs Future Analysis */}
+            <WinNowFutureChart 
+              winNowScore={result.teamAWinNow + result.teamBWinNow}
+              futureScore={result.teamAFuture + result.teamBFuture}
+            />
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -46,12 +46,44 @@ export async function POST(request: NextRequest) {
     const teamAPlayers = teamA.map(id => playerMap.get(id)).filter(Boolean)
     const teamBPlayers = teamB.map(id => playerMap.get(id)).filter(Boolean)
 
+    // Calculate Win-Now vs Future analysis
+    const calculateWinNowFuture = (players: any[]) => {
+      let winNowScore = 0
+      let futureScore = 0
+      
+      players.forEach(player => {
+        if (player) {
+          const age = player.age || 25 // Default age if not provided
+          if (age >= 24 && age <= 29) {
+            // Prime years - Win-Now
+            winNowScore += player.value
+          } else if (age < 24) {
+            // Young players - Future
+            futureScore += player.value
+          } else {
+            // Veterans - split between Win-Now and Future
+            winNowScore += player.value * 0.7
+            futureScore += player.value * 0.3
+          }
+        }
+      })
+      
+      return { winNowScore, futureScore }
+    }
+
+    const teamAAnalysis = calculateWinNowFuture(teamAPlayers)
+    const teamBAnalysis = calculateWinNowFuture(teamBPlayers)
+
     const result = {
       totalA,
       totalB,
       verdict,
       teamAPlayers,
       teamBPlayers,
+      teamAWinNow: teamAAnalysis.winNowScore,
+      teamAFuture: teamAAnalysis.futureScore,
+      teamBWinNow: teamBAnalysis.winNowScore,
+      teamBFuture: teamBAnalysis.futureScore,
       saved: false
     }
 
