@@ -44,7 +44,7 @@ export function SuggestedMoves({ moves, className }: SuggestedMovesProps) {
       case "medium":
         return "bg-yellow-500/20 text-yellow-400"
       case "low":
-        return "bg-gray-500/20 text-gray-400"
+        return "bg-muted/20 text-muted"
     }
   }
 

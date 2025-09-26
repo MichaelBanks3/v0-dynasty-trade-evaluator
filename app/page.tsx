@@ -7,35 +7,28 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-bg">
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-foreground sm:text-5xl md:text-6xl text-balance">
-            Dynasty Trade Evaluator
-          </h1>
-          <p className="mt-6 text-xl text-muted-foreground max-w-3xl mx-auto text-pretty">
-            Make smarter dynasty fantasy football trades with our comprehensive evaluation tool. Analyze player values,
-            future potential, and trade fairness in seconds.
-          </p>
-          <div className="mt-10">
-            <Link href="/dashboard">
-              <Button size="lg" className="text-lg px-8 py-3">
-                Get Started
-              </Button>
-            </Link>
+      <section className="relative overflow-hidden">
+        <div className="relative mx-auto max-w-6xl px-6 py-16 text-center">
+          <h1 className="text-5xl font-extrabold tracking-tight">Dynasty Trade Evaluator</h1>
+          <p className="mt-4 text-lg text-[color:var(--muted)]">Make smarter dynasty trades...</p>
+          <div className="mt-8 flex justify-center gap-4">
+            <a href="/trade" className="bg-[color:var(--primary)] text-[color:var(--primary-foreground)] rounded-2xl px-6 py-3 font-semibold hover:opacity-90">Create Trade</a>
+            <a href="/dashboard" className="bg-[color:var(--accent)] text-[color:var(--accent-foreground)] rounded-2xl px-6 py-3 font-semibold hover:opacity-90">My Dashboard</a>
           </div>
         </div>
+      </section>
 
         {/* Value Props */}
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-6">
           <Card>
             <CardHeader>
               <div className="flex items-center space-x-2">
-                <TrendingUp className="h-6 w-6 text-primary" />
-                <CardTitle>Smart Valuations</CardTitle>
+                <TrendingUp className="h-6 w-6 text-[color:var(--primary)]" />
+                <CardTitle className="text-fg">Smart Valuations</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              <CardDescription>
+              <CardDescription className="text-[color:var(--muted)]">
                 Get accurate player valuations based on age, position, and league settings. Our algorithm considers both
                 current value and future potential.
               </CardDescription>
@@ -45,12 +38,12 @@ export default function HomePage() {
           <Card>
             <CardHeader>
               <div className="flex items-center space-x-2">
-                <Users className="h-6 w-6 text-primary" />
-                <CardTitle>League Customization</CardTitle>
+                <Users className="h-6 w-6 text-[color:var(--primary)]" />
+                <CardTitle className="text-fg">League Customization</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              <CardDescription>
+              <CardDescription className="text-[color:var(--muted)]">
                 Tailor evaluations to your specific league settings including Superflex, TE Premium, and custom scoring
                 to get the most accurate assessments.
               </CardDescription>
@@ -60,19 +53,18 @@ export default function HomePage() {
           <Card>
             <CardHeader>
               <div className="flex items-center space-x-2">
-                <BarChart3 className="h-6 w-6 text-primary" />
-                <CardTitle>Win-Now vs Future</CardTitle>
+                <BarChart3 className="h-6 w-6 text-[color:var(--primary)]" />
+                <CardTitle className="text-fg">Win-Now vs Future</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              <CardDescription>
+              <CardDescription className="text-[color:var(--muted)]">
                 Understand whether a trade helps you compete now or builds for the future. Perfect for making strategic
                 decisions based on your team's timeline.
               </CardDescription>
             </CardContent>
           </Card>
         </div>
-      </div>
     </div>
   )
 }

@@ -42,37 +42,22 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <div className="min-h-screen bg-bg">
       {/* Sticky Top Navigation */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
+      <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur border-b border-[color:var(--border)]">
+        <div className="h-1 w-full bg-[color:var(--primary)]" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14">
             {/* Left: App Name/Logo */}
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center">
-                  <BarChart3 className="h-5 w-5 text-accent-contrast" />
-                </div>
-                <span className="text-xl font-bold text-text">Dynasty Trade Evaluator</span>
-              </Link>
-            </div>
+            <span className="font-semibold tracking-wide">Dynasty Trade Evaluator</span>
 
             {/* Center: Navigation Tabs (md+) */}
-            <nav className="hidden md:flex items-center space-x-1">
+            <nav className="hidden md:flex items-center gap-6 text-sm">
               {navItems.map((item) => {
-                const Icon = item.icon
                 return (
-                  <Link key={item.href} href={item.href}>
-                    <Button
-                      variant={isActive(item.href) ? "default" : "ghost"}
-                      size="sm"
-                      className={`h-9 px-4 ${
-                        isActive(item.href)
-                          ? "bg-accent text-accent-contrast hover:bg-accent/90"
-                          : "text-subtext hover:text-text hover:bg-muted/50"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4 mr-2" />
-                      {item.label}
-                    </Button>
+                  <Link 
+                    key={item.href} 
+                    href={item.href}
+                    className="hover:text-[color:var(--primary)] transition"
+                  >
+                    {item.label}
                   </Link>
                 )
               })}

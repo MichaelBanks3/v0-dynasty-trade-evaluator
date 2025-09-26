@@ -321,7 +321,7 @@ export function AdvisorPanel({ teamAAssets, teamBAssets, settings, className }: 
             ) : deltas.futureIndex > deltas.nowIndex ? (
               <span className="text-blue-600">✓ Aligned with Rebuild timeline (Future +{deltas.futureIndex} {" > "} Now {deltas.nowIndex})</span>
             ) : (
-              <span className="text-gray-600">Balanced impact on both timelines</span>
+              <span className="text-muted">Balanced impact on both timelines</span>
             )}
           </div>
         </div>

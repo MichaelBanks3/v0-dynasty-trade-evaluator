@@ -68,7 +68,7 @@ export function TradeResultCardV2({ result, settings }: TradeResultCardV2Props) 
       case 'FAVORS_B':
         return 'bg-purple-100 text-purple-800'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-muted/20 text-fg'
     }
   }
 

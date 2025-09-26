@@ -2,36 +2,68 @@
 /* If you use tailwindcss-animate on v4, uncomment: */
 /* @import "tailwindcss-animate"; */
 
-/* Theme tokens (shadcn-style) */
-@theme {
-  --color-background: 0 0% 100%;
-  --color-foreground: 222 47% 11%;
-  --color-card: 0 0% 100%;
-  --color-muted: 210 40% 96.1%;
-}
-
 :root {
-  --background: var(--color-background);
-  --foreground: var(--color-foreground);
-  --card: var(--color-card);
-  --muted: var(--color-muted);
-  /* Optional: keep a 'surface' token if code uses bg-surface */
-  --surface: var(--color-background);
+  --dk-bg: #0b0d10;
+  --dk-surface: #121418;
+  --dk-elev: #1a1d21;
+  --dk-border: #2a2f36;
+  --dk-muted: #9097a5;
+  --dk-text: #e8edf2;
+
+  --dk-green: #00e267;
+  --dk-green-600: #00b355;
+  --dk-green-700: #009447;
+
+  --dk-orange: #ff7a00;
+  --dk-orange-600: #e56700;
+
+  --dk-focus: #3de989;
+  --dk-chart-1: #00e267;
+  --dk-chart-2: #ff7a00;
+  --dk-chart-3: #9aa6ff;
+  --dk-chart-4: #ffd166;
+  --dk-chart-5: #7bdff2;
 }
 
 .dark {
-  --background: 222 47% 11%;
-  --foreground: 0 0% 100%;
-  --card: 222 47% 13%;
-  --muted: 222 17% 18%;
-  --surface: 222 47% 11%;
+  --dk-bg: #0b0d10;
+  --dk-surface: #121418;
+  --dk-elev: #1a1d21;
+  --dk-border: #2a2f36;
+  --dk-muted: #9097a5;
+  --dk-text: #e8edf2;
+
+  --dk-green: #00e267;
+  --dk-green-600: #00b355;
+  --dk-green-700: #009447;
+
+  --dk-orange: #ff7a00;
+  --dk-orange-600: #e56700;
+
+  --dk-focus: #3de989;
+  --dk-chart-1: #00e267;
+  --dk-chart-2: #ff7a00;
+  --dk-chart-3: #9aa6ff;
+  --dk-chart-4: #ffd166;
+  --dk-chart-5: #7bdff2;
 }
 
-/* Utility mappings for tokens */
-.bg-background { background-color: hsl(var(--background)); }
-.text-foreground { color: hsl(var(--foreground)); }
-.bg-card { background-color: hsl(var(--card)); }
-.bg-muted { background-color: hsl(var(--muted)); }
+:root, .dark {
+  --background: var(--dk-bg);
+  --foreground: var(--dk-text);
+  --card: var(--dk-elev);
+  --card-foreground: var(--dk-text);
+  --primary: var(--dk-green);
+  --primary-foreground: #06130b;
+  --accent: var(--dk-orange);
+  --accent-foreground: #120700;
+  --border: var(--dk-border);
+  --muted: var(--dk-muted);
+  --ring: var(--dk-focus);
+  --radius: 0.75rem;
+}
 
-/* Back-compat: if code uses bg-surface, keep it working */
-.bg-surface { background-color: hsl(var(--surface)); }
+html, body {
+  background-color: var(--background);
+  color: var(--foreground);
+}

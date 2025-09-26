@@ -20,55 +20,24 @@ const config: Config = {
     },
     extend: {
       colors: {
-        // DraftKings-like dark theme
-        bg: "#0B0F14", // Page background
-        surface: "#11161C", // Card background
-        muted: "#1A2430", // Muted elements
-        text: "#E6F0FF", // Primary text
-        subtext: "#9FB2C8", // Secondary text
-        danger: "#FF3B3B", // Red for danger
-        warn: "#FFC145", // Yellow for warnings
-        info: "#3BA3FF", // Blue for info
-        
-        // Shadcn/ui compatibility
-        border: "rgba(255, 255, 255, 0.06)",
-        input: "rgba(255, 255, 255, 0.08)",
-        ring: "#16DB65",
-        background: "#0B0F14", // --bg
-        foreground: "#E6F0FF", // --text
-        card: {
-          DEFAULT: "#11161C", // --surface
-          foreground: "#E6F0FF", // --text
-        },
-        popover: {
-          DEFAULT: "#11161C", // --surface
-          foreground: "#E6F0FF", // --text
-        },
+        bg: "var(--background)",
+        fg: "var(--foreground)",
+        surface: "var(--dk-surface)",
+        elev: "var(--dk-elev)",
+        border: "var(--dk-border)",
+        muted: "var(--dk-muted)",
         primary: {
-          DEFAULT: "#16DB65", // --accent
-          foreground: "#07210F", // --accent-contrast
-        },
-        secondary: {
-          DEFAULT: "#1A2430", // --muted
-          foreground: "#E6F0FF", // --text
-        },
-        muted: {
-          DEFAULT: "#1A2430", // --muted
-          foreground: "#9FB2C8", // --subtext
+          DEFAULT: "var(--primary)",
+          fg: "var(--primary-foreground)"
         },
         accent: {
-          DEFAULT: "#16DB65", // --accent
-          foreground: "#07210F", // --accent-contrast
-        },
-        destructive: {
-          DEFAULT: "#FF3B3B", // --danger
-          foreground: "#E6F0FF", // --text
-        },
+          DEFAULT: "var(--accent)",
+          fg: "var(--accent-foreground)"
+        }
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        xl: "var(--radius)",
+        "2xl": "calc(var(--radius) + 0.25rem)"
       },
       keyframes: {
         "accordion-down": {
@@ -95,8 +64,9 @@ const config: Config = {
         "slide-in": "slide-in 0.3s ease-out",
       },
       boxShadow: {
-        "glow": "0 0 20px rgba(22, 219, 101, 0.3)",
-        "glow-sm": "0 0 10px rgba(22, 219, 101, 0.2)",
+        dk: "0 10px 30px rgba(0,0,0,0.35)",
+        "dk-soft": "0 6px 16px rgba(0,0,0,0.28)",
+        "dk-glow": "0 0 0 3px var(--ring)"
       },
     },
   },

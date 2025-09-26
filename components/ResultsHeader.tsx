@@ -39,20 +39,20 @@ export function ResultsHeader({
       case 'FAIR':
         return <Minus className="h-5 w-5 text-green-600" />
       default:
-        return <Minus className="h-5 w-5 text-gray-600" />
+        return <Minus className="h-5 w-5 text-muted" />
     }
   }
 
   const getVerdictColor = () => {
     switch (verdict) {
       case 'FAVORS_A':
-        return 'bg-blue-50 text-blue-700 border-blue-200'
+        return 'bg-blue-50 text-blue-700 border-[color:var(--border)]'
       case 'FAVORS_B':
-        return 'bg-purple-50 text-purple-700 border-purple-200'
+        return 'bg-purple-50 text-purple-700 border-[color:var(--border)]'
       case 'FAIR':
-        return 'bg-green-50 text-green-700 border-green-200'
+        return 'bg-green-50 text-green-700 border-[color:var(--border)]'
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-200'
+        return 'bg-muted/20 text-fg border-[color:var(--border)]'
     }
   }
 
@@ -152,7 +152,7 @@ ${explanation}`
                   <span className="font-medium">{teamANow.toLocaleString()}</span>
                 </div>
                 <div 
-                  className="w-full bg-gray-200 rounded-full h-2"
+                  className="w-full bg-muted/30 rounded-full h-2"
                   role="progressbar"
                   aria-valuenow={teamANow}
                   aria-valuemin={0}
@@ -171,7 +171,7 @@ ${explanation}`
                   <span className="font-medium">{teamAFuture.toLocaleString()}</span>
                 </div>
                 <div 
-                  className="w-full bg-gray-200 rounded-full h-2"
+                  className="w-full bg-muted/30 rounded-full h-2"
                   role="progressbar"
                   aria-valuenow={teamAFuture}
                   aria-valuemin={0}
@@ -195,7 +195,7 @@ ${explanation}`
                   <span className="font-medium">{teamBNow.toLocaleString()}</span>
                 </div>
                 <div 
-                  className="w-full bg-gray-200 rounded-full h-2"
+                  className="w-full bg-muted/30 rounded-full h-2"
                   role="progressbar"
                   aria-valuenow={teamBNow}
                   aria-valuemin={0}
@@ -214,7 +214,7 @@ ${explanation}`
                   <span className="font-medium">{teamBFuture.toLocaleString()}</span>
                 </div>
                 <div 
-                  className="w-full bg-gray-200 rounded-full h-2"
+                  className="w-full bg-muted/30 rounded-full h-2"
                   role="progressbar"
                   aria-valuenow={teamBFuture}
                   aria-valuemin={0}

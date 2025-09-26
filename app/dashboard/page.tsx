@@ -91,7 +91,7 @@ export default function DashboardPage() {
       case 'FAIR':
         return <Minus className="h-4 w-4 text-green-600" />
       default:
-        return <Minus className="h-4 w-4 text-gray-600" />
+        return <Minus className="h-4 w-4 text-muted" />
     }
   }
 
@@ -104,7 +104,7 @@ export default function DashboardPage() {
       case 'FAIR':
         return 'bg-green-500/20 text-green-400 border-green-500/30'
       default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+        return 'bg-muted/20 text-muted border-[color:var(--border)]'
     }
   }
 

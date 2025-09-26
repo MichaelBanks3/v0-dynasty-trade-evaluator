@@ -27,23 +27,24 @@ type Recommendation =
     };
 
 export async function GET() {
-  // Await auth() to get the session
+  // If your Clerk version returns sync data here, remove 'await'. For @clerk/nextjs/server it's async.
   const session = await auth();
-  const userId = session?.userId;
+  const userId = session.userId;
 
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Get valuations with player relation included
+  // IMPORTANT: Do NOT filter on settingsHash unless it exists in your Prisma model
   const valuations = await prisma.valuation.findMany({
-    include: { player: true },
+    // where: { ... }, // add real filters only if they exist in Prisma
+    include: { player: true },  // so v.player is available
     take: 100,
   });
 
   const recs: Recommendation[] = valuations.map((v) => {
-    const nowScore = v.nowScore ?? v.projNow ?? v.marketValue ?? null;
-    const futureScore = v.futureScore ?? v.projFuture ?? v.marketValue ?? null;
+    const nowScore = v.projNow ?? v.marketValue ?? null;
+    const futureScore = v.projFuture ?? v.marketValue ?? null;
     const composite =
       nowScore !== null && futureScore !== null
         ? Number(((nowScore + futureScore) / 2).toFixed(2))

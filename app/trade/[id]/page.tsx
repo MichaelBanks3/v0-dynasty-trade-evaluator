@@ -45,7 +45,7 @@ async function TradeContent({ tradeId }: { tradeId: string }) {
       case 'FAVORS_A': return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
       case 'FAVORS_B': return 'bg-purple-500/20 text-purple-400 border-purple-500/30'
       case 'FAIR': return 'bg-green-500/20 text-green-400 border-green-500/30'
-      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+      default: return 'bg-muted/20 text-muted border-[color:var(--border)]'
     }
   }
 

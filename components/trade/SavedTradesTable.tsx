@@ -49,7 +49,7 @@ export function SavedTradesTable({ trades, onStatusChange, className }: SavedTra
       case 'FAIR':
         return 'bg-green-500/20 text-green-400 border-green-500/30'
       default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+        return 'bg-muted/20 text-muted border-[color:var(--border)]'
     }
   }
 
@@ -62,9 +62,9 @@ export function SavedTradesTable({ trades, onStatusChange, className }: SavedTra
       case 'DENIED':
         return 'bg-red-500/20 text-red-400 border-red-500/30'
       case 'SANDBOX':
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+        return 'bg-muted/20 text-muted border-[color:var(--border)]'
       default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+        return 'bg-muted/20 text-muted border-[color:var(--border)]'
     }
   }
 

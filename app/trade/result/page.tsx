@@ -199,7 +199,7 @@ function TradeResultPageContent() {
       case 'FAIR':
         return { text: 'Even Trade', icon: Minus, color: 'text-green-600' }
       default:
-        return { text: 'Unknown', icon: Minus, color: 'text-gray-600' }
+        return { text: 'Unknown', icon: Minus, color: 'text-muted' }
     }
   }
 
@@ -235,8 +235,8 @@ ${result.explanation}`
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-text">Trade Evaluation Results</h1>
         <SettingsDrawer onSettingsChange={setSettings} currentSettings={settings} />
-      </div>
-      
+        </div>
+
       <div>
         <ActiveSettings settings={settings} />
       </div>
