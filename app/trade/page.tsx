@@ -104,7 +104,7 @@ function TradePageContent() {
       
       {!isSignedIn && <GuestBanner />}
       
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-text">Create Trade</h1>
@@ -140,27 +140,31 @@ function TradePageContent() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {/* Totals */}
-                  <div className="space-y-2">
+                  {/* Running Totals */}
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-subtext">Team A Total</span>
-                      <Badge variant="outline">{teamATotal.toLocaleString()}</Badge>
+                      <span className="text-sm text-subtext">Team A</span>
+                      <span className="text-sm font-medium text-text">{teamATotal.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-subtext">Team B Total</span>
-                      <Badge variant="outline">{teamBTotal.toLocaleString()}</Badge>
+                      <span className="text-sm text-subtext">Team B</span>
+                      <span className="text-sm font-medium text-text">{teamBTotal.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-border">
+                      <span className="text-sm font-medium text-text">Delta</span>
+                      <span className="text-sm font-medium text-text">{Math.abs(teamATotal - teamBTotal).toLocaleString()}</span>
                     </div>
                   </div>
 
-                  {/* Verdict */}
-                  <div className="pt-2 border-t border-border">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-text">Fairness</span>
-                      <div className="flex items-center space-x-2">
-                        <VerdictIcon className={`h-4 w-4 ${verdictDisplay.color}`} />
-                        <Badge variant="secondary">{verdictDisplay.text}</Badge>
-                      </div>
-                    </div>
+                  {/* Verdict Pill */}
+                  <div className="flex justify-center">
+                    <Badge 
+                      variant="outline" 
+                      className={`${verdictDisplay.color} border-current px-4 py-2 text-sm font-medium`}
+                    >
+                      <VerdictIcon className="h-4 w-4 mr-2" />
+                      {verdictDisplay.text}
+                    </Badge>
                   </div>
 
                   {/* Asset Lists */}

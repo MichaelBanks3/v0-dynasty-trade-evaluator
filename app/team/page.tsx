@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { PlayerSearch } from '@/components/PlayerSearch'
+import { PlayerSearchV2 } from '@/components/PlayerSearchV2'
 import { LeagueImportFlow } from '@/components/LeagueImportFlow'
 import { useToast } from '@/hooks/use-toast'
 import { Settings, Users, Calendar, Save, ArrowLeft, Download } from 'lucide-react'
@@ -287,13 +287,12 @@ export default function TeamPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <PlayerSearch
+                <PlayerSearchV2
                   onAssetAdded={(asset) => {
                     if (asset.kind === 'player') {
                       addToRoster(asset.id)
                     }
                   }}
-                  placeholder="Search players to add to roster..."
                 />
                 <div className="mt-4 space-y-2">
                   {roster.map((playerId) => (
@@ -322,13 +321,12 @@ export default function TeamPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <PlayerSearch
+                <PlayerSearchV2
                   onAssetAdded={(asset) => {
                     if (asset.kind === 'pick') {
                       addToPicks(asset.id)
                     }
                   }}
-                  placeholder="Search picks to add..."
                 />
                 <div className="mt-4 space-y-2">
                   {ownedPicks.map((pickId) => (

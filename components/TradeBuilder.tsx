@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { SrOnly } from "@/components/ui/sr-only"
 import { X, Trash2, Users, Calendar } from "lucide-react"
 import { useTradeStore, type Asset } from "@/lib/store"
 import { safeArray } from "@/lib/safe"
-import { PlayerSearch } from "./PlayerSearch"
+import { PlayerSearchV2 } from "./PlayerSearchV2"
 import { ActiveSideControl } from "./ActiveSideControl"
 import { trackEvent, generatePayloadHash } from "@/lib/analytics"
 import { useEffect, useRef } from "react"
@@ -202,18 +203,21 @@ export function TradeBuilder({ searchInputRef }: TradeBuilderProps) {
         </CardContent>
       </Card>
 
-      {/* Active Side Control */}
-      <div className="flex items-center gap-4">
-        <span className="text-sm font-medium text-muted-foreground">Add to:</span>
-        <ActiveSideControl />
+      {/* Player Search with Active Side Control */}
+      <div className="space-y-4">
+        {/* Active Side Control - pinned above search */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-muted-foreground">Add to:</span>
+          <ActiveSideControl />
+        </div>
+        
+        {/* Player Search */}
+        <PlayerSearchV2 
+          onAssetAdded={handleAssetAdded} 
+          searchRef={searchRef}
+          isAssetDuplicate={isAssetDuplicate}
+        />
       </div>
-
-      {/* Player Search */}
-      <PlayerSearch 
-        onAssetAdded={handleAssetAdded} 
-        searchRef={searchRef}
-        isAssetDuplicate={isAssetDuplicate}
-      />
 
       {/* Team A */}
       <Card 
@@ -223,15 +227,13 @@ export function TradeBuilder({ searchInputRef }: TradeBuilderProps) {
         aria-label="Team A trade builder"
         aria-selected={activeSide === "A"}
       >
-        <CardHeader 
-          className="cursor-pointer"
-          onClick={() => handlePanelClick("A")}
-        >
+        <CardHeader className="p-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Team A</CardTitle>
             <div className="flex items-center gap-2">
+              <span className="text-sm text-muted">Total</span>
               <Badge variant="outline" className="text-sm font-medium" data-testid="team-a-total">
-                Total: {Math.round(teamATotal)}
+                {Math.round(teamATotal).toLocaleString()}
               </Badge>
               {safeTeamAAssets.length > 0 && (
                 <Button
@@ -241,30 +243,33 @@ export function TradeBuilder({ searchInputRef }: TradeBuilderProps) {
                     e.stopPropagation()
                     clearSide('A')
                   }}
-                  className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
-                  title="Clear Team A"
+                  className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                  aria-label="Clear all assets from Team A"
                 >
-                  <Trash2 className="h-3 w-3" />
+                  <Trash2 className="h-4 w-4" />
+                  <SrOnly>Clear all assets from Team A</SrOnly>
                 </Button>
               )}
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4">
           {safeTeamAAssets.length === 0 ? (
             <div 
-              className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:bg-accent/50 transition-colors"
+              className="border border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:bg-accent/50 transition-colors"
               onClick={() => handlePanelClick("A")}
             >
               <p className="text-muted-foreground">No assets yet</p>
               <p className="text-sm text-muted-foreground mt-1">Search and add players or picks above</p>
             </div>
           ) : (
-            <div className="space-y-3" role="list" aria-label="Team A assets">
-              {safeTeamAAssets.map((asset: Asset) => (
+            <div className="space-y-0" role="list" aria-label="Team A assets">
+              {safeTeamAAssets.map((asset: Asset, index: number) => (
                 <div
                   key={asset.id}
-                  className="flex items-center justify-between p-3 bg-accent rounded-lg"
+                  className={`flex items-center justify-between py-3 ${
+                    index < safeTeamAAssets.length - 1 ? 'border-b border-dotted border-border' : ''
+                  }`}
                   data-testid={`asset-${asset.id}`}
                   role="listitem"
                   tabIndex={0}
@@ -275,7 +280,7 @@ export function TradeBuilder({ searchInputRef }: TradeBuilderProps) {
                     }
                   }}
                 >
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3 flex-1">
                     <div>
                       <p className="font-medium text-foreground">{asset.label}</p>
                       <div className="flex items-center space-x-2 mt-1">
@@ -299,7 +304,7 @@ export function TradeBuilder({ searchInputRef }: TradeBuilderProps) {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-muted-foreground">{asset.value}</span>
+                    <span className="text-sm font-medium text-foreground">{asset.value.toLocaleString()}</span>
                     <Button
                       type="button"
                       variant="ghost"
@@ -310,8 +315,10 @@ export function TradeBuilder({ searchInputRef }: TradeBuilderProps) {
                       }}
                       className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
                       data-testid={`remove-${asset.id}`}
+                      aria-label={`Remove ${asset.label} from Team A`}
                     >
                       <X className="h-4 w-4" />
+                      <SrOnly>Remove {asset.label} from Team A</SrOnly>
                     </Button>
                   </div>
                 </div>
@@ -329,15 +336,13 @@ export function TradeBuilder({ searchInputRef }: TradeBuilderProps) {
         aria-label="Team B trade builder"
         aria-selected={activeSide === "B"}
       >
-        <CardHeader 
-          className="cursor-pointer"
-          onClick={() => handlePanelClick("B")}
-        >
+        <CardHeader className="p-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Team B</CardTitle>
             <div className="flex items-center gap-2">
+              <span className="text-sm text-muted">Total</span>
               <Badge variant="outline" className="text-sm font-medium" data-testid="team-b-total">
-                Total: {Math.round(teamBTotal)}
+                {Math.round(teamBTotal).toLocaleString()}
               </Badge>
               {safeTeamBAssets.length > 0 && (
                 <Button
@@ -347,30 +352,33 @@ export function TradeBuilder({ searchInputRef }: TradeBuilderProps) {
                     e.stopPropagation()
                     clearSide('B')
                   }}
-                  className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
-                  title="Clear Team B"
+                  className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                  aria-label="Clear all assets from Team B"
                 >
-                  <Trash2 className="h-3 w-3" />
+                  <Trash2 className="h-4 w-4" />
+                  <SrOnly>Clear all assets from Team B</SrOnly>
                 </Button>
               )}
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4">
           {safeTeamBAssets.length === 0 ? (
             <div 
-              className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:bg-accent/50 transition-colors"
+              className="border border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:bg-accent/50 transition-colors"
               onClick={() => handlePanelClick("B")}
             >
               <p className="text-muted-foreground">No assets yet</p>
               <p className="text-sm text-muted-foreground mt-1">Search and add players or picks above</p>
             </div>
           ) : (
-            <div className="space-y-3" role="list" aria-label="Team B assets">
-              {safeTeamBAssets.map((asset: Asset) => (
+            <div className="space-y-0" role="list" aria-label="Team B assets">
+              {safeTeamBAssets.map((asset: Asset, index: number) => (
                 <div
                   key={asset.id}
-                  className="flex items-center justify-between p-3 bg-accent rounded-lg"
+                  className={`flex items-center justify-between py-3 ${
+                    index < safeTeamBAssets.length - 1 ? 'border-b border-dotted border-border' : ''
+                  }`}
                   data-testid={`asset-${asset.id}`}
                   role="listitem"
                   tabIndex={0}
@@ -381,7 +389,7 @@ export function TradeBuilder({ searchInputRef }: TradeBuilderProps) {
                     }
                   }}
                 >
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3 flex-1">
                     <div>
                       <p className="font-medium text-foreground">{asset.label}</p>
                       <div className="flex items-center space-x-2 mt-1">
@@ -405,7 +413,7 @@ export function TradeBuilder({ searchInputRef }: TradeBuilderProps) {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-muted-foreground">{asset.value}</span>
+                    <span className="text-sm font-medium text-foreground">{asset.value.toLocaleString()}</span>
                     <Button
                       type="button"
                       variant="ghost"
@@ -416,8 +424,10 @@ export function TradeBuilder({ searchInputRef }: TradeBuilderProps) {
                       }}
                       className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
                       data-testid={`remove-${asset.id}`}
+                      aria-label={`Remove ${asset.label} from Team B`}
                     >
                       <X className="h-4 w-4" />
+                      <SrOnly>Remove {asset.label} from Team B</SrOnly>
                     </Button>
                   </div>
                 </div>

@@ -26,13 +26,16 @@ const config: Config = {
         elev: "var(--dk-elev)",
         border: "var(--dk-border)",
         muted: "var(--dk-muted)",
+        text: "var(--foreground)",
+        subtext: "var(--dk-muted)",
         primary: {
           DEFAULT: "var(--primary)",
           fg: "var(--primary-foreground)"
         },
         accent: {
           DEFAULT: "var(--accent)",
-          fg: "var(--accent-foreground)"
+          fg: "var(--accent-foreground)",
+          contrast: "var(--accent-foreground)"
         }
       },
       borderRadius: {

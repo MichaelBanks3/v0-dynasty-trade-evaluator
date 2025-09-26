@@ -4,7 +4,7 @@ import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import Providers from './providers'
 import { Toaster } from '@/components/ui/toaster'
-import { AppShell } from '@/components/AppShell'
+import { ConditionalAppShell } from '@/components/layout/ConditionalAppShell'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -22,9 +22,9 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} min-h-screen bg-bg text-fg antialiased`}>
         <Providers>
-          <AppShell>
+          <ConditionalAppShell>
             {children}
-          </AppShell>
+          </ConditionalAppShell>
         </Providers>
         <Toaster />
         <Analytics />

@@ -2,9 +2,6 @@
 
 import { useTradeStore, type Asset } from "@/lib/store"
 import { TradeResultCardV2 } from "@/components/TradeResultCardV2"
-import { BalancingSuggestion } from "@/components/BalancingSuggestion"
-import { FeedbackWidget } from "@/components/FeedbackWidget"
-import { AdvisorWithRecommendations } from "@/components/AdvisorPanel"
 import { LeagueBenchmarkChips } from "@/components/LeagueBenchmarkChips"
 import { SettingsDrawer } from "@/components/SettingsDrawer"
 import { ActiveSettings } from "@/components/ActiveSettings"
@@ -20,6 +17,9 @@ import { StatBar } from "@/components/ui/StatBar"
 import { formatPts, safeNumber } from "@/lib/format"
 import { GuestBanner } from "@/components/GuestBanner"
 import { useAuth } from "@clerk/nextjs"
+import { SiteShell } from "@/components/layout/SiteShell"
+import { TradeResultBottom } from "@/components/trade/result/TradeResultBottom"
+import { SrOnly } from "@/components/ui/sr-only"
 
 export default function TradeResultPage() {
   const [mounted, setMounted] = useState(false)
@@ -30,12 +30,15 @@ export default function TradeResultPage() {
 
   if (!mounted) {
     return (
-      <div className="space-y-6">
+      <SiteShell
+        title="Trade Evaluation Results"
+        subtitle="Loading..."
+      >
         <div className="text-center py-16">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
-          <p className="text-subtext">Loading...</p>
+          <p className="text-muted">Loading...</p>
         </div>
-      </div>
+      </SiteShell>
     )
   }
 
@@ -124,60 +127,70 @@ function TradeResultPageContent() {
   }, [])
 
   if (safeTeamAAssets.length === 0 && safeTeamBAssets.length === 0) {
-  return (
-      <div className="space-y-6">
-        <div className="text-center py-16">
-          <AlertCircle className="h-16 w-16 text-subtext mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-text mb-2">No Trade Data</h1>
-          <p className="text-subtext mb-6">
-            It looks like you haven't created a trade yet. Go back to create your first trade evaluation.
-          </p>
-          <Button asChild className="bg-accent text-accent-contrast hover:bg-accent/90">
+    return (
+      <SiteShell
+        title="No Trade Data"
+        subtitle="It looks like you haven't created a trade yet. Go back to create your first trade evaluation."
+        right={
+          <Button asChild variant="secondary">
             <a href="/trade">Create Trade</a>
           </Button>
-            </div>
-          </div>
+        }
+      >
+        <div className="text-center py-16">
+          <AlertCircle className="h-16 w-16 text-muted mx-auto mb-4" />
+        </div>
+      </SiteShell>
     )
   }
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <SiteShell
+        title="Trade Evaluation Results"
+        subtitle="Evaluating your trade..."
+      >
         <div className="text-center py-16">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
-          <p className="text-subtext">Evaluating your trade...</p>
+          <p className="text-muted">Evaluating your trade...</p>
         </div>
-      </div>
+      </SiteShell>
     )
   }
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <div className="text-center py-16">
-          <AlertCircle className="h-16 w-16 text-danger mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-text mb-2">Evaluation Error</h1>
-          <p className="text-subtext mb-6">{error}</p>
-          <Button asChild className="bg-accent text-accent-contrast hover:bg-accent/90">
+      <SiteShell
+        title="Evaluation Error"
+        subtitle={error}
+        right={
+          <Button asChild variant="secondary">
             <a href="/trade">Try Again</a>
           </Button>
+        }
+      >
+        <div className="text-center py-16">
+          <AlertCircle className="h-16 w-16 text-muted mx-auto mb-4" />
         </div>
-      </div>
+      </SiteShell>
     )
   }
 
   if (!result) {
     return (
-      <div className="space-y-6">
-        <div className="text-center py-16">
-          <AlertCircle className="h-16 w-16 text-subtext mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-text mb-2">No Results</h1>
-          <p className="text-subtext mb-6">Unable to evaluate the trade.</p>
-          <Button asChild className="bg-accent text-accent-contrast hover:bg-accent/90">
+      <SiteShell
+        title="No Results"
+        subtitle="Unable to evaluate the trade."
+        right={
+          <Button asChild variant="secondary">
             <a href="/trade">Try Again</a>
           </Button>
+        }
+      >
+        <div className="text-center py-16">
+          <AlertCircle className="h-16 w-16 text-muted mx-auto mb-4" />
         </div>
-          </div>
+      </SiteShell>
     )
   }
 
@@ -229,20 +242,18 @@ ${result.explanation}`
   }
 
   return (
-    <div className="space-y-6">
+    <SiteShell
+      title="Trade Evaluation Results"
+      right={<SettingsDrawer onSettingsChange={setSettings} currentSettings={settings} />}
+    >
       {!isSignedIn && <GuestBanner />}
       
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-text">Trade Evaluation Results</h1>
-        <SettingsDrawer onSettingsChange={setSettings} currentSettings={settings} />
-        </div>
-
-      <div>
+      <div className="mb-4">
         <ActiveSettings settings={settings} />
       </div>
 
       {/* Three Main Cards Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Card 1: Verdict + Score Breakdown */}
           <Card className="lg:col-span-1">
@@ -254,9 +265,11 @@ ${result.explanation}`
                   size="sm"
                   onClick={copyBreakdown}
                   className="gap-2"
+                  aria-label="Copy trade breakdown to clipboard"
                 >
                   <Copy className="h-4 w-4" />
                   Copy
+                  <SrOnly>Copy trade breakdown to clipboard</SrOnly>
                 </Button>
               </div>
             </CardHeader>
@@ -265,17 +278,17 @@ ${result.explanation}`
                 {/* Main Verdict */}
                 <div className="flex items-center gap-3">
                   <VerdictIcon className={`h-6 w-6 ${verdictDisplay.color}`} />
-                  <h2 className="text-xl font-bold">{verdictDisplay.text}</h2>
+                  <h2 className="text-xl font-bold text-fg">{verdictDisplay.text}</h2>
                 </div>
 
                 {/* Now vs Future Breakdown */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Now vs Future</span>
+                    <span className="text-sm font-medium text-fg">Now vs Future</span>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground" />
+                          <Info className="h-4 w-4 text-muted" />
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>Now: Current season value</p>
@@ -288,7 +301,7 @@ ${result.explanation}`
                   <div className="space-y-3">
                     {/* Team A */}
                     <div>
-                      <div className="text-xs text-subtext mb-2">Team A</div>
+                      <div className="text-xs text-muted mb-2">Team A</div>
                       <div className="space-y-2">
                         <StatBar
                           label="Now"
@@ -307,7 +320,7 @@ ${result.explanation}`
 
                     {/* Team B */}
                     <div>
-                      <div className="text-xs text-subtext mb-2">Team B</div>
+                      <div className="text-xs text-muted mb-2">Team B</div>
                       <div className="space-y-2">
                         <StatBar
                           label="Now"
@@ -338,7 +351,7 @@ ${result.explanation}`
               <div className="space-y-4">
                 {/* Team A Assets */}
                 <div>
-                  <div className="text-sm font-medium text-muted-foreground mb-2">Team A</div>
+                  <div className="text-sm font-medium text-muted mb-2">Team A</div>
                   <div className="space-y-2">
                         {safeTeamAAssets.length > 0 ? (
                           (safeTeamAAssets as Asset[]).map((asset: Asset, index: number) => (
@@ -348,14 +361,14 @@ ${result.explanation}`
                             </div>
                           ))
                         ) : (
-                          <div className="text-sm text-subtext">No assets</div>
+                          <div className="text-sm text-muted">No assets</div>
                         )}
                   </div>
                 </div>
 
                 {/* Team B Assets */}
                 <div>
-                  <div className="text-sm font-medium text-muted-foreground mb-2">Team B</div>
+                  <div className="text-sm font-medium text-muted mb-2">Team B</div>
                   <div className="space-y-2">
                         {safeTeamBAssets.length > 0 ? (
                           (safeTeamBAssets as Asset[]).map((asset: Asset, index: number) => (
@@ -365,7 +378,7 @@ ${result.explanation}`
                             </div>
                           ))
                         ) : (
-                          <div className="text-sm text-subtext">No assets</div>
+                          <div className="text-sm text-muted">No assets</div>
                         )}
                   </div>
                 </div>
@@ -383,11 +396,11 @@ ${result.explanation}`
                 {/* Totals */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-subtext">Team A Total</span>
+                    <span className="text-sm text-muted">Team A Total</span>
                     <Badge variant="outline">{formatPts(teamATotal)}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-subtext">Team B Total</span>
+                    <span className="text-sm text-muted">Team B Total</span>
                     <Badge variant="outline">{formatPts(teamBTotal)}</Badge>
                   </div>
                 </div>
@@ -395,7 +408,7 @@ ${result.explanation}`
                 {/* Fairness */}
                 <div className="pt-2 border-t border-border">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">Fairness</span>
+                    <span className="text-sm font-medium text-fg">Fairness</span>
                     <div className="flex items-center space-x-2">
                       <VerdictIcon className="h-4 w-4" />
                       <Badge variant="secondary">{verdictDisplay.text}</Badge>
@@ -405,65 +418,48 @@ ${result.explanation}`
 
                 {/* Explanation */}
                 <div className="pt-2 border-t border-border">
-                  <p className="text-sm text-muted-foreground">{result.explanation}</p>
+                  <p className="text-sm text-muted">{result.explanation}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-      {/* Additional Sections */}
-      <div className="space-y-6">
-          {/* Balancing Suggestion */}
-          {result.suggestion && (
-            <BalancingSuggestion
-              suggestion={result.suggestion}
-              delta={Math.abs(result.totals.teamA.compositeValue - result.totals.teamB.compositeValue) / Math.max(result.totals.teamA.compositeValue, result.totals.teamB.compositeValue)}
-            />
-          )}
+              {/* New Bottom Section */}
+              <TradeResultBottom
+                result={result}
+                settings={settings}
+                teamProfile={leagueInfo}
+              />
 
-          {/* League Benchmark Chips */}
-          {leagueInfo && (
-            <LeagueBenchmarkChips
-              leagueId={leagueInfo.leagueId}
-              teamId={leagueInfo.teamId}
-            />
-          )}
+              {/* League Benchmark Chips */}
+              {leagueInfo && (
+                <LeagueBenchmarkChips
+                  leagueId={leagueInfo.leagueId}
+                  teamId={leagueInfo.teamId}
+                />
+              )}
 
-          {/* Trade Finder CTA */}
-          {leagueInfo && (
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-semibold">Find Trades vs Opponents</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Get personalized trade proposals based on your league
-                    </p>
-                  </div>
-                  <Button asChild>
-                    <a href={`/league/${leagueInfo.leagueId}?findTrades=true`}>
-                      Find Trades
-                    </a>
-              </Button>
-            </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Advisor Panel */}
-          <AdvisorWithRecommendations
-            teamAAssets={safeTeamAAssets.map((asset: any) => asset.id)}
-            teamBAssets={safeTeamBAssets.map((asset: any) => asset.id)}
-            settings={settings}
-          />
-
-          {/* Feedback Widget */}
-          <FeedbackWidget 
-            tradeSlug={result.slug}
-            settingsHash={settings ? JSON.stringify(settings) : undefined}
-          />
-      </div>
-    </div>
+              {/* Trade Finder CTA */}
+              {leagueInfo && (
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold text-fg">Find Trades vs Opponents</h4>
+                        <p className="text-sm text-muted">
+                          Get personalized trade proposals based on your league
+                        </p>
+                      </div>
+                      <Button asChild>
+                        <a href={`/league/${leagueInfo.leagueId}?findTrades=true`}>
+                          Find Trades
+                        </a>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+    </SiteShell>
   )
 }
