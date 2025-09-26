@@ -288,7 +288,6 @@ export function PlayerSearchV2({ onAssetAdded, searchRef, isAssetDuplicate }: Pl
             </div>
           </div>
         </div>
-      </div>
       
       {/* Toast */}
       <div className="fixed top-4 right-4 z-50" style={{pointerEvents: 'none'}}>

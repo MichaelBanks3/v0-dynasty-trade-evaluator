@@ -194,8 +194,7 @@ export function TradeBuilder({ searchInputRef }: TradeBuilderProps) {
               id="te-premium"
               checked={leagueSettings.tePremium}
               onCheckedChange={(checked) => updateLeagueSettings({ tePremium: checked })}
-              />
-            </div>
+            />
           </div>
         </div>
       </div>
