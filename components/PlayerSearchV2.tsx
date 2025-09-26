@@ -172,40 +172,38 @@ export function PlayerSearchV2({ onAssetAdded, searchRef, isAssetDuplicate }: Pl
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            Search Players & Picks
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="relative">
-              <Command 
-                ref={commandRef}
-                className="rounded-lg border border-border bg-elev"
-                onKeyDown={handleKeyDown}
-              >
-                <CommandInput
-                  ref={searchRef}
-                  placeholder="Search for players or picks... (Press / to focus)"
-                  value={searchTerm}
-                  onValueChange={handleInputChange}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
-                  data-testid="search-input"
-                  className="text-base placeholder:text-muted border-border focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-elev"
-                />
+      <div className="theme-card p-6">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Search className="h-5 w-5" />
+          Search Players & Picks
+        </h2>
+        <div className="space-y-4">
+          <div className="relative">
+            <Command 
+              ref={commandRef}
+              className="rounded-lg theme-border popover"
+              onKeyDown={handleKeyDown}
+            >
+              <CommandInput
+                ref={searchRef}
+                placeholder="Search for players or picks... (Press / to focus)"
+                value={searchTerm}
+                onValueChange={handleInputChange}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                data-testid="search-input"
+                className="input focus-ring w-full text-base"
+              />
                 {isOpen && (
                   <CommandList 
-                    className="max-h-72 overflow-y-auto z-[60]"
+                    className="popover"
+                    style={{position:'absolute', zIndex:60, maxHeight: '18rem', overflowY:'auto'}}
                     data-testid="search-results"
                   >
                     {isLoading ? (
                       <div className="p-4 text-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
-                        <p className="text-sm text-muted">Searching...</p>
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 mx-auto mb-2" style={{borderColor: 'hsl(var(--primary))'}}></div>
+                        <p className="text-sm theme-muted">Searching...</p>
                       </div>
                     ) : searchResults.length > 0 ? (
                       <CommandGroup>
@@ -218,44 +216,42 @@ export function PlayerSearchV2({ onAssetAdded, searchRef, isAssetDuplicate }: Pl
                               value={asset.label}
                               onSelect={() => !isAlreadyAdded && handleSelect(asset)}
                               disabled={isAlreadyAdded}
-                              className="flex items-center justify-between p-3 cursor-pointer"
+                              className="flex items-center justify-between p-3 cursor-pointer hover:opacity-80 transition-opacity"
                               data-testid={`search-result-${asset.id}`}
                             >
                               <div className="flex items-center space-x-3 flex-1">
                                 <div>
-                                  <p className="font-bold text-fg">{asset.label}</p>
+                                  <p className="font-semibold">{asset.label}</p>
                                   <div className="flex items-center space-x-2 mt-1">
-                                    <Badge variant={asset.kind === "player" ? "default" : "secondary"} className="text-xs">
+                                    <span className="text-xs theme-muted">
                                       {asset.kind === "player" ? (asset.meta?.position || 'Unknown') : "Pick"}
-                                    </Badge>
+                                    </span>
                                     {asset.kind === "player" && (
                                       <>
-                                        <Badge variant="outline" className="text-xs">
+                                        <span className="text-xs theme-muted">
                                           {asset.meta?.team || 'Unknown'}
-                                        </Badge>
-                                        <span className="text-xs text-muted">Age {asset.meta?.age || 'Unknown'}</span>
+                                        </span>
+                                        <span className="text-xs theme-muted">Age {asset.meta?.age || 'Unknown'}</span>
                                       </>
                                     )}
                                     {asset.kind === "pick" && (
-                                      <Badge variant="outline" className="text-xs">
+                                      <span className="text-xs theme-muted">
                                         {asset.meta?.year} Round {asset.meta?.round}
-                                      </Badge>
+                                      </span>
                                     )}
                                   </div>
                                 </div>
                               </div>
                               <div className="flex items-center space-x-2">
-                                <span className="text-sm font-medium text-muted">{asset.value}</span>
+                                <span className="text-sm font-medium theme-muted">{asset.value}</span>
                                 {isAlreadyAdded ? (
-                                  <Badge variant="secondary" className="text-xs">
+                                  <span className="chip text-xs">
                                     Added
-                                  </Badge>
+                                  </span>
                                 ) : (
-                                  <Button
+                                  <button
                                     type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-10 w-10 p-0"
+                                    className="h-10 w-10 p-0 btn-ghost focus-ring"
                                     onClick={(e) => {
                                       e.preventDefault()
                                       e.stopPropagation()
@@ -266,7 +262,7 @@ export function PlayerSearchV2({ onAssetAdded, searchRef, isAssetDuplicate }: Pl
                                   >
                                     <Plus className="h-4 w-4" />
                                     <SrOnly>Add {asset.label} to Team {activeSide}</SrOnly>
-                                  </Button>
+                                  </button>
                                 )}
                               </div>
                             </CommandItem>
@@ -275,15 +271,14 @@ export function PlayerSearchV2({ onAssetAdded, searchRef, isAssetDuplicate }: Pl
                       </CommandGroup>
                     ) : hasSearched ? (
                       <CommandEmpty>
-                        <div className="text-center py-6">
-                          <p className="text-sm text-muted mb-2">No results found</p>
-                          <p className="text-sm text-muted">Try 'Williams' or '2026 1st'</p>
+                        <div className="p-4">
+                          <p className="text-sm theme-muted">No results. Try 'Williams' or '2026 1st'</p>
                         </div>
                       </CommandEmpty>
                     ) : (
                       <CommandEmpty>
-                        <div className="text-center py-6">
-                          <p className="text-sm text-muted">Start typing to search...</p>
+                        <div className="p-4">
+                          <p className="text-sm theme-muted">Start typing to search...</p>
                         </div>
                       </CommandEmpty>
                     )}
@@ -292,23 +287,21 @@ export function PlayerSearchV2({ onAssetAdded, searchRef, isAssetDuplicate }: Pl
               </Command>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       
       {/* Toast */}
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 right-4 z-50" style={{pointerEvents: 'none'}}>
         {toast.isVisible && (
-          <div className="bg-elev border border-border rounded-lg shadow-lg p-4 max-w-sm">
+          <div className="theme-card p-4 max-w-sm" style={{pointerEvents: 'auto'}}>
             <div className="flex items-center justify-between gap-2">
-              <p className="text-sm text-fg">{toast.message}</p>
-              <Button
-                variant="ghost"
-                size="sm"
+              <p className="text-sm">{toast.message}</p>
+              <button
                 onClick={hideToast}
-                className="h-6 w-6 p-0"
+                className="h-6 w-6 p-0 btn-ghost focus-ring"
               >
                 <X className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
           </div>
         )}

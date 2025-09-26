@@ -3,6 +3,18 @@
 /* @import "tailwindcss-animate"; */
 
 :root {
+  /* Global theme variables */
+  --bg:          222 16% 10%;
+  --surface:     222 15% 14%;
+  --border:      222 10% 26%;
+  --text:        210 20% 96%;
+  --muted:       210 10% 70%;
+  --primary:     210 90% 56%;
+  --on-primary:  210 20% 98%;
+  --accent:      155 85% 45%;
+  --on-accent:   155 20% 98%;
+
+  /* Legacy variables for backward compatibility */
   --dk-bg: #0b0d10;
   --dk-surface: #121418;
   --dk-elev: #1a1d21;
@@ -67,3 +79,15 @@ html, body {
   background-color: var(--background);
   color: var(--foreground);
 }
+
+/* Global theme helpers (plain CSS classes) */
+.theme-bg      { background-color: hsl(var(--bg));     color: hsl(var(--text)); }
+.theme-card    { background-color: hsl(var(--surface)); border: 1px solid hsl(var(--border)); border-radius: 16px; }
+.theme-border  { border-color: hsl(var(--border)); }
+.theme-muted   { color: hsl(var(--muted)); }
+.btn-primary   { background: hsl(var(--primary)); color: hsl(var(--on-primary)); border-radius: 12px; padding: 8px 14px; }
+.btn-ghost     { border: 1px solid hsl(var(--border)); border-radius: 12px; padding: 8px 14px; background: transparent; }
+.chip          { background: hsl(var(--accent)); color: hsl(var(--on-accent)); border-radius: 999px; padding: 4px 10px; font-weight: 600; }
+.input         { background: hsl(var(--surface)); color: hsl(var(--text)); border: 1px solid hsl(var(--border)); border-radius: 12px; padding: 10px 12px; }
+.popover       { background: hsl(var(--surface)); color: hsl(var(--text)); border: 1px solid hsl(var(--border)); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.focus-ring:focus { outline: none; box-shadow: 0 0 0 2px hsl(var(--primary)); }

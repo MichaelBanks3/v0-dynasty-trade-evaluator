@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { auth } from '@clerk/nextjs/server'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { getUserTrades } from '@/lib/server/getUserTrades'
@@ -17,13 +18,13 @@ function DashboardSkeleton() {
     <SiteShell
       title="Dashboard"
       subtitle="Loading your trades..."
-      right={<div className="h-10 w-32 bg-muted/20 rounded animate-pulse"></div>}
+      right={<div className="h-10 w-32 theme-muted rounded animate-pulse opacity-20"></div>}
     >
       <div className="space-y-4">
-        <div className="h-6 w-40 bg-muted/20 rounded animate-pulse"></div>
+        <div className="h-6 w-40 theme-muted rounded animate-pulse opacity-20"></div>
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-20 bg-muted/20 rounded animate-pulse"></div>
+            <div key={i} className="h-20 theme-muted rounded animate-pulse opacity-20"></div>
           ))}
         </div>
       </div>
@@ -48,12 +49,10 @@ async function DashboardContent() {
         title="Dashboard"
         subtitle={`${trades.length} recent trades`}
         right={
-          <Button asChild variant="secondary">
-            <a href="/trade">
-              <Plus className="h-4 w-4 mr-2" />
-              New Trade
-            </a>
-          </Button>
+          <Link href="/trade" className="btn-primary focus-ring">
+            <Plus className="h-4 w-4 mr-2" />
+            New Trade
+          </Link>
         }
       >
         {/* Recent Trades */}

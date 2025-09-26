@@ -34,7 +34,7 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <div className="min-h-screen bg-bg">
       {/* Sticky Top Navigation */}
-      <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur border-b border-[color:var(--border)]">
+      <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur border-b border-[color:var(--border)]" style={{position:'relative', zIndex:50}}>
         <div className="h-1 w-full bg-[color:var(--primary)]" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14">
           {/* Left: App Name/Logo */}
@@ -49,7 +49,7 @@ export function AppShell({ children }: AppShellProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="hover:text-[color:var(--primary)] transition"
+                  className="btn-ghost focus-ring"
                 >
                   {item.label}
                 </Link>
@@ -101,24 +101,14 @@ export function AppShell({ children }: AppShellProps) {
               </DropdownMenu>
             ) : (
               <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href="/sign-in">Sign In</Link>
-                </Button>
-                <Button
-                  size="sm"
-                  className="bg-accent text-accent-contrast hover:bg-accent/90"
-                  asChild
-                >
-                  <Link href="/sign-up">Sign Up</Link>
-                </Button>
+                <Link href="/sign-in" className="btn-ghost focus-ring">Sign In</Link>
+                <Link href="/sign-up" className="btn-primary focus-ring">Sign Up</Link>
               </div>
             )}
 
             {/* Mobile menu button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden h-9 px-2"
+            <button
+              className="md:hidden h-9 px-2 btn-ghost focus-ring"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? (
@@ -126,13 +116,13 @@ export function AppShell({ children }: AppShellProps) {
               ) : (
                 <Menu className="h-5 w-5" />
               )}
-            </Button>
+            </button>
           </div>
         </div>
 
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-border/50 bg-surface">
+          <div className="md:hidden border-t theme-border theme-card">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -141,19 +131,14 @@ export function AppShell({ children }: AppShellProps) {
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
+                    className={`w-full justify-start h-10 flex items-center px-3 py-2 rounded-md transition-colors ${
+                      isActive(item.href)
+                        ? "btn-primary"
+                        : "btn-ghost focus-ring"
+                    }`}
                   >
-                    <Button
-                      variant={isActive(item.href) ? "default" : "ghost"}
-                      size="sm"
-                      className={`w-full justify-start h-10 ${
-                        isActive(item.href)
-                          ? "bg-accent text-accent-contrast"
-                          : "text-subtext hover:text-text hover:bg-muted/50"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4 mr-3" />
-                      {item.label}
-                    </Button>
+                    <Icon className="h-4 w-4 mr-3" />
+                    {item.label}
                   </Link>
                 );
               })}

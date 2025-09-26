@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useTradeStore, type Asset } from "@/lib/store"
 import { TradeResultCardV2 } from "@/components/TradeResultCardV2"
 import { LeagueBenchmarkChips } from "@/components/LeagueBenchmarkChips"
@@ -34,10 +35,10 @@ export default function TradeResultPage() {
         title="Trade Evaluation Results"
         subtitle="Loading..."
       >
-        <div className="text-center py-16">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
-          <p className="text-muted">Loading...</p>
-        </div>
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: 'hsl(var(--primary))'}}></div>
+            <p className="theme-muted">Loading...</p>
+          </div>
       </SiteShell>
     )
   }
@@ -132,13 +133,11 @@ function TradeResultPageContent() {
         title="No Trade Data"
         subtitle="It looks like you haven't created a trade yet. Go back to create your first trade evaluation."
         right={
-          <Button asChild variant="secondary">
-            <a href="/trade">Create Trade</a>
-          </Button>
+          <Link href="/trade" className="btn-ghost focus-ring">Create Trade</Link>
         }
       >
         <div className="text-center py-16">
-          <AlertCircle className="h-16 w-16 text-muted mx-auto mb-4" />
+          <AlertCircle className="h-16 w-16 theme-muted mx-auto mb-4" />
         </div>
       </SiteShell>
     )
@@ -151,8 +150,8 @@ function TradeResultPageContent() {
         subtitle="Evaluating your trade..."
       >
         <div className="text-center py-16">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
-          <p className="text-muted">Evaluating your trade...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: 'hsl(var(--primary))'}}></div>
+          <p className="theme-muted">Evaluating your trade...</p>
         </div>
       </SiteShell>
     )
@@ -164,13 +163,11 @@ function TradeResultPageContent() {
         title="Evaluation Error"
         subtitle={error}
         right={
-          <Button asChild variant="secondary">
-            <a href="/trade">Try Again</a>
-          </Button>
+          <Link href="/trade" className="btn-ghost focus-ring">Try Again</Link>
         }
       >
         <div className="text-center py-16">
-          <AlertCircle className="h-16 w-16 text-muted mx-auto mb-4" />
+          <AlertCircle className="h-16 w-16 theme-muted mx-auto mb-4" />
         </div>
       </SiteShell>
     )
@@ -182,13 +179,11 @@ function TradeResultPageContent() {
         title="No Results"
         subtitle="Unable to evaluate the trade."
         right={
-          <Button asChild variant="secondary">
-            <a href="/trade">Try Again</a>
-          </Button>
+          <Link href="/trade" className="btn-ghost focus-ring">Try Again</Link>
         }
       >
         <div className="text-center py-16">
-          <AlertCircle className="h-16 w-16 text-muted mx-auto mb-4" />
+          <AlertCircle className="h-16 w-16 theme-muted mx-auto mb-4" />
         </div>
       </SiteShell>
     )
@@ -256,173 +251,159 @@ ${result.explanation}`
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Card 1: Verdict + Score Breakdown */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Trade Verdict</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={copyBreakdown}
-                  className="gap-2"
-                  aria-label="Copy trade breakdown to clipboard"
-                >
-                  <Copy className="h-4 w-4" />
-                  Copy
-                  <SrOnly>Copy trade breakdown to clipboard</SrOnly>
-                </Button>
+          <div className="theme-card p-6 lg:col-span-1">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Trade Verdict</h2>
+              <button
+                onClick={copyBreakdown}
+                className="btn-ghost focus-ring gap-2"
+                aria-label="Copy trade breakdown to clipboard"
+              >
+                <Copy className="h-4 w-4" />
+                Copy
+                <SrOnly>Copy trade breakdown to clipboard</SrOnly>
+              </button>
+            </div>
+            <div className="space-y-4">
+              {/* Main Verdict */}
+              <div className="flex items-center gap-3">
+                <VerdictIcon className={`h-6 w-6 ${verdictDisplay.color}`} />
+                <h2 className="text-xl font-bold">{verdictDisplay.text}</h2>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Main Verdict */}
-                <div className="flex items-center gap-3">
-                  <VerdictIcon className={`h-6 w-6 ${verdictDisplay.color}`} />
-                  <h2 className="text-xl font-bold text-fg">{verdictDisplay.text}</h2>
-                </div>
 
-                {/* Now vs Future Breakdown */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-fg">Now vs Future</span>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Now: Current season value</p>
-                          <p>Future: Long-term dynasty value</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
+              {/* Now vs Future Breakdown */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Now vs Future</span>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Info className="h-4 w-4 theme-muted" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Now: Current season value</p>
+                        <p>Future: Long-term dynasty value</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                   
-                  <div className="space-y-3">
-                    {/* Team A */}
-                    <div>
-                      <div className="text-xs text-muted mb-2">Team A</div>
-                      <div className="space-y-2">
-                        <StatBar
-                          label="Now"
-                          value={result.totals.teamA.nowScore}
-                          max={result.totals.teamA.compositeValue}
-                          tone="blue"
-                        />
-                        <StatBar
-                          label="Future"
-                          value={result.totals.teamA.futureScore}
-                          max={result.totals.teamA.compositeValue}
-                          tone="green"
-                        />
+                <div className="space-y-3">
+                  {/* Team A */}
+                  <div>
+                    <div className="text-xs theme-muted mb-2">Team A</div>
+                    <div className="space-y-2">
+                      <StatBar
+                        label="Now"
+                        value={result.totals.teamA.nowScore}
+                        max={result.totals.teamA.compositeValue}
+                        tone="blue"
+                      />
+                      <StatBar
+                        label="Future"
+                        value={result.totals.teamA.futureScore}
+                        max={result.totals.teamA.compositeValue}
+                        tone="green"
+                      />
+                    </div>
                   </div>
-                </div>
 
-                    {/* Team B */}
-                    <div>
-                      <div className="text-xs text-muted mb-2">Team B</div>
-                      <div className="space-y-2">
-                        <StatBar
-                          label="Now"
-                          value={result.totals.teamB.nowScore}
-                          max={result.totals.teamB.compositeValue}
-                          tone="blue"
-                        />
-                        <StatBar
-                          label="Future"
-                          value={result.totals.teamB.futureScore}
-                          max={result.totals.teamB.compositeValue}
-                          tone="green"
-                        />
-                      </div>
+                  {/* Team B */}
+                  <div>
+                    <div className="text-xs theme-muted mb-2">Team B</div>
+                    <div className="space-y-2">
+                      <StatBar
+                        label="Now"
+                        value={result.totals.teamB.nowScore}
+                        max={result.totals.teamB.compositeValue}
+                        tone="blue"
+                      />
+                      <StatBar
+                        label="Future"
+                        value={result.totals.teamB.futureScore}
+                        max={result.totals.teamB.compositeValue}
+                        tone="green"
+                      />
                     </div>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Card 2: Team Assets with Values */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="text-lg">Team Assets</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Team A Assets */}
-                <div>
-                  <div className="text-sm font-medium text-muted mb-2">Team A</div>
-                  <div className="space-y-2">
-                        {safeTeamAAssets.length > 0 ? (
-                          (safeTeamAAssets as Asset[]).map((asset: Asset, index: number) => (
-                            <div key={index} className="flex items-center justify-between text-sm">
-                              <span className="truncate">{asset.label}</span>
-                              <Badge variant="outline">{formatPts(asset.value)}</Badge>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-sm text-muted">No assets</div>
-                        )}
-                  </div>
-                </div>
-
-                {/* Team B Assets */}
-                <div>
-                  <div className="text-sm font-medium text-muted mb-2">Team B</div>
-                  <div className="space-y-2">
-                        {safeTeamBAssets.length > 0 ? (
-                          (safeTeamBAssets as Asset[]).map((asset: Asset, index: number) => (
-                            <div key={index} className="flex items-center justify-between text-sm">
-                              <span className="truncate">{asset.label}</span>
-                              <Badge variant="outline">{formatPts(asset.value)}</Badge>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-sm text-muted">No assets</div>
-                        )}
-                  </div>
+          <div className="theme-card p-6 lg:col-span-1">
+            <h2 className="text-lg font-semibold mb-4">Team Assets</h2>
+            <div className="space-y-4">
+              {/* Team A Assets */}
+              <div>
+                <div className="text-sm font-medium theme-muted mb-2">Team A</div>
+                <div className="space-y-2">
+                  {safeTeamAAssets.length > 0 ? (
+                    (safeTeamAAssets as Asset[]).map((asset: Asset, index: number) => (
+                      <div key={index} className="flex items-center justify-between text-sm">
+                        <span className="truncate">{asset.label}</span>
+                        <span className="text-xs theme-muted">{formatPts(asset.value)}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-sm theme-muted">No assets</div>
+                  )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
+
+              {/* Team B Assets */}
+              <div>
+                <div className="text-sm font-medium theme-muted mb-2">Team B</div>
+                <div className="space-y-2">
+                  {safeTeamBAssets.length > 0 ? (
+                    (safeTeamBAssets as Asset[]).map((asset: Asset, index: number) => (
+                      <div key={index} className="flex items-center justify-between text-sm">
+                        <span className="truncate">{asset.label}</span>
+                        <span className="text-xs theme-muted">{formatPts(asset.value)}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-sm theme-muted">No assets</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Card 3: Trade Summary with Totals and Fairness */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="text-lg">Trade Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Totals */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted">Team A Total</span>
-                    <Badge variant="outline">{formatPts(teamATotal)}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted">Team B Total</span>
-                    <Badge variant="outline">{formatPts(teamBTotal)}</Badge>
-                  </div>
+          <div className="theme-card p-6 lg:col-span-1">
+            <h2 className="text-lg font-semibold mb-4">Trade Summary</h2>
+            <div className="space-y-4">
+              {/* Totals */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm theme-muted">Team A Total</span>
+                  <span className="text-xs theme-muted">{formatPts(teamATotal)}</span>
                 </div>
-
-                {/* Fairness */}
-                <div className="pt-2 border-t border-border">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-fg">Fairness</span>
-                    <div className="flex items-center space-x-2">
-                      <VerdictIcon className="h-4 w-4" />
-                      <Badge variant="secondary">{verdictDisplay.text}</Badge>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Explanation */}
-                <div className="pt-2 border-t border-border">
-                  <p className="text-sm text-muted">{result.explanation}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm theme-muted">Team B Total</span>
+                  <span className="text-xs theme-muted">{formatPts(teamBTotal)}</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+
+              {/* Fairness */}
+              <div className="pt-2 theme-border border-t">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Fairness</span>
+                  <div className="flex items-center space-x-2">
+                    <VerdictIcon className="h-4 w-4" />
+                    <span className="chip">{verdictDisplay.text}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Explanation */}
+              <div className="pt-2 theme-border border-t">
+                <p className="text-sm theme-muted">{result.explanation}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
               {/* New Bottom Section */}
@@ -442,23 +423,19 @@ ${result.explanation}`
 
               {/* Trade Finder CTA */}
               {leagueInfo && (
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-semibold text-fg">Find Trades vs Opponents</h4>
-                        <p className="text-sm text-muted">
-                          Get personalized trade proposals based on your league
-                        </p>
-                      </div>
-                      <Button asChild>
-                        <a href={`/league/${leagueInfo.leagueId}?findTrades=true`}>
-                          Find Trades
-                        </a>
-                      </Button>
+                <div className="theme-card p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold">Find Trades vs Opponents</h4>
+                      <p className="text-sm theme-muted">
+                        Get personalized trade proposals based on your league
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <a href={`/league/${leagueInfo.leagueId}?findTrades=true`} className="btn-primary focus-ring">
+                      Find Trades
+                    </a>
+                  </div>
+                </div>
               )}
     </SiteShell>
   )

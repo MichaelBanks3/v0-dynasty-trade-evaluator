@@ -22,17 +22,15 @@ export function Toast({ message, isVisible, onClose, duration = 3000 }: ToastPro
   if (!isVisible) return null
 
   return (
-    <div className="fixed top-4 right-4 z-50 bg-background border border-border rounded-lg shadow-lg p-4 max-w-sm">
+    <div className="fixed top-4 right-4 z-50 theme-card p-4 max-w-sm" style={{pointerEvents: 'auto'}}>
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm text-foreground">{message}</p>
-        <Button
-          variant="ghost"
-          size="sm"
+        <p className="text-sm">{message}</p>
+        <button
           onClick={onClose}
-          className="h-6 w-6 p-0"
+          className="h-6 w-6 p-0 btn-ghost focus-ring"
         >
           <X className="h-4 w-4" />
-        </Button>
+        </button>
       </div>
     </div>
   )

@@ -12,7 +12,7 @@ export function SiteShell({ children, title, subtitle, right }: SiteShellProps) 
     <div className="min-h-screen bg-bg">
       {/* Header Section */}
       {(title || subtitle || right) && (
-        <section className="relative overflow-hidden">
+        <section className="relative overflow-hidden" style={{position:'relative', zIndex:50}}>
           <div className="relative mx-auto max-w-6xl px-6 py-16">
             <div className="flex items-center justify-between">
               <div>

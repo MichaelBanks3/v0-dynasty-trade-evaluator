@@ -24,33 +24,29 @@ export default function TradePage() {
   }, [])
 
   if (!mounted) {
-    return (
-      <div className="space-y-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-text">Create Trade</h1>
-          <p className="text-subtext mt-2">
-            Build and evaluate your dynasty fantasy football trade
-          </p>
+  return (
+    <div className="space-y-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Create Trade</h1>
+        <p className="theme-muted mt-2">
+          Build and evaluate your dynasty fantasy football trade
+        </p>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <TradeBuilder />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <TradeBuilder />
-          </div>
-          <div className="lg:col-span-1">
-            <Card className="sticky top-24">
-              <CardHeader>
-                <CardTitle>Trade Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-subtext">
-                  Add players or picks to see trade summary
-                </div>
-              </CardContent>
-            </Card>
+        <div className="lg:col-span-1">
+          <div className="theme-card p-6 sticky top-24">
+            <h2 className="text-lg font-semibold mb-4">Trade Summary</h2>
+            <div className="text-center py-8 theme-muted">
+              Add players or picks to see trade summary
+            </div>
           </div>
         </div>
       </div>
-    )
+    </div>
+  )
   }
 
   return <TradePageContent />
@@ -107,15 +103,13 @@ function TradePageContent() {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-text">Create Trade</h1>
-            <p className="text-subtext mt-2">
+            <h1 className="text-3xl font-bold">Create Trade</h1>
+            <p className="theme-muted mt-2">
               Build and evaluate your dynasty fantasy football trade
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="outline" asChild>
-              <a href="/team">Team Profile</a>
-            </Button>
+            <a href="/team" className="btn-ghost focus-ring">Team Profile</a>
             <OnboardingPanel />
           </div>
         </div>
@@ -129,92 +123,85 @@ function TradePageContent() {
 
         {/* Trade Summary */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-24">
-            <CardHeader>
-              <CardTitle>Trade Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {safeTeamAAssets.length === 0 && safeTeamBAssets.length === 0 ? (
-                <div className="text-center py-8 text-subtext">
-                  Add players or picks to see trade summary
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* Running Totals */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-subtext">Team A</span>
-                      <span className="text-sm font-medium text-text">{teamATotal.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-subtext">Team B</span>
-                      <span className="text-sm font-medium text-text">{teamBTotal.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center justify-between pt-2 border-t border-border">
-                      <span className="text-sm font-medium text-text">Delta</span>
-                      <span className="text-sm font-medium text-text">{Math.abs(teamATotal - teamBTotal).toLocaleString()}</span>
-                    </div>
+          <div className="theme-card p-6 sticky top-24">
+            <h2 className="text-lg font-semibold mb-4">Trade Summary</h2>
+            {safeTeamAAssets.length === 0 && safeTeamBAssets.length === 0 ? (
+              <div className="text-center py-8 theme-muted">
+                Add players or picks to see trade summary
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Running Totals */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm theme-muted">Team A</span>
+                    <span className="text-sm font-medium">{teamATotal.toLocaleString()}</span>
                   </div>
-
-                  {/* Verdict Pill */}
-                  <div className="flex justify-center">
-                    <Badge 
-                      variant="outline" 
-                      className={`${verdictDisplay.color} border-current px-4 py-2 text-sm font-medium`}
-                    >
-                      <VerdictIcon className="h-4 w-4 mr-2" />
-                      {verdictDisplay.text}
-                    </Badge>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm theme-muted">Team B</span>
+                    <span className="text-sm font-medium">{teamBTotal.toLocaleString()}</span>
                   </div>
-
-                  {/* Asset Lists */}
-                  <div className="space-y-3">
-                    <div>
-                      <div className="text-sm font-medium text-subtext mb-2">Team A Assets</div>
-                      <div className="space-y-1">
-                        {safeTeamAAssets.length > 0 ? (
-                          (safeTeamAAssets as Asset[]).map((asset: Asset, index: number) => (
-                            <div key={index} className="flex items-center justify-between text-sm">
-                              <span className="truncate">{asset.label}</span>
-                              <Badge variant="outline">{Number(asset.value || 0).toLocaleString()}</Badge>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-sm text-subtext">No assets</div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="text-sm font-medium text-subtext mb-2">Team B Assets</div>
-                      <div className="space-y-1">
-                        {safeTeamBAssets.length > 0 ? (
-                          (safeTeamBAssets as Asset[]).map((asset: Asset, index: number) => (
-                            <div key={index} className="flex items-center justify-between text-sm">
-                              <span className="truncate">{asset.label}</span>
-                              <Badge variant="outline">{Number(asset.value || 0).toLocaleString()}</Badge>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-sm text-subtext">No assets</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4">
-                    <Button 
-                      onClick={handleEvaluate}
-                      className="w-full bg-accent text-accent-contrast hover:bg-accent/90 hover:shadow-glow"
-                      disabled={safeTeamAAssets.length === 0 && safeTeamBAssets.length === 0}
-                    >
-                      Evaluate Trade
-                    </Button>
+                  <div className="flex items-center justify-between pt-2 theme-border border-t">
+                    <span className="text-sm font-medium">Delta</span>
+                    <span className="text-sm font-medium">{Math.abs(teamATotal - teamBTotal).toLocaleString()}</span>
                   </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+
+                {/* Verdict Pill */}
+                <div className="flex justify-center">
+                  <div className={`chip ${verdictDisplay.color}`}>
+                    <VerdictIcon className="h-4 w-4 mr-2" />
+                    {verdictDisplay.text}
+                  </div>
+                </div>
+
+                {/* Asset Lists */}
+                <div className="space-y-3">
+                  <div>
+                    <div className="text-sm font-medium theme-muted mb-2">Team A Assets</div>
+                    <div className="space-y-1">
+                      {safeTeamAAssets.length > 0 ? (
+                        (safeTeamAAssets as Asset[]).map((asset: Asset, index: number) => (
+                          <div key={index} className="flex items-center justify-between text-sm">
+                            <span className="truncate">{asset.label}</span>
+                            <span className="text-xs theme-muted">{Number(asset.value || 0).toLocaleString()}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-sm theme-muted">No assets</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm font-medium theme-muted mb-2">Team B Assets</div>
+                    <div className="space-y-1">
+                      {safeTeamBAssets.length > 0 ? (
+                        (safeTeamBAssets as Asset[]).map((asset: Asset, index: number) => (
+                          <div key={index} className="flex items-center justify-between text-sm">
+                            <span className="truncate">{asset.label}</span>
+                            <span className="text-xs theme-muted">{Number(asset.value || 0).toLocaleString()}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-sm theme-muted">No assets</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-4">
+                  <button 
+                    onClick={handleEvaluate}
+                    className="w-full btn-primary focus-ring"
+                    disabled={safeTeamAAssets.length === 0 && safeTeamBAssets.length === 0}
+                  >
+                    Evaluate Trade
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

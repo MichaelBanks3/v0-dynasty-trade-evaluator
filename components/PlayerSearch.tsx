@@ -237,7 +237,7 @@ export function PlayerSearch({ onAssetAdded, searchRef, isAssetDuplicate }: Play
               
               {/* Search dropdown menu */}
               {showDropdown === 'search' && (
-                <div className="absolute top-full right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-20 min-w-48">
+                <div className="absolute top-full right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-20 min-w-48" style={{pointerEvents: 'auto'}}>
                   <div className="p-1 space-y-1">
                     <Button
                       type="button"
@@ -322,7 +322,7 @@ export function PlayerSearch({ onAssetAdded, searchRef, isAssetDuplicate }: Play
                 </div>
               )}
               {isOpen && (
-                <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto" style={{pointerEvents: 'auto'}}>
                   {isLoading ? (
                     <div className="p-4 text-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
@@ -412,7 +412,7 @@ export function PlayerSearch({ onAssetAdded, searchRef, isAssetDuplicate }: Play
                                     <ChevronDown className="h-3 w-3" />
                                   </Button>
                                   {isDropdownOpen && (
-                                    <div className="absolute top-full right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-20">
+                                    <div className="absolute top-full right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-20" style={{pointerEvents: 'auto'}}>
                                       <div className="p-1 space-y-1">
                                         <Button
                                           type="button"
@@ -474,9 +474,9 @@ export function PlayerSearch({ onAssetAdded, searchRef, isAssetDuplicate }: Play
       </Card>
       
       {/* Toast */}
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 right-4 z-50" style={{pointerEvents: 'none'}}>
         {toast.isVisible && (
-          <div className="bg-background border border-border rounded-lg shadow-lg p-4 max-w-sm">
+          <div className="bg-background border border-border rounded-lg shadow-lg p-4 max-w-sm" style={{pointerEvents: 'auto'}}>
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm text-foreground">{toast.message}</p>
               <Button

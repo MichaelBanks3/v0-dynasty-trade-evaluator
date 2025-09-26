@@ -23,19 +23,19 @@ export function AppNav() {
             <div className="ml-10 flex items-baseline space-x-4">
               <Link
                 href="/"
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md px-3 py-2 hover:bg-accent"
+                className="btn-ghost focus-ring"
               >
                 Home
               </Link>
               <Link
                 href="/trade"
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md px-3 py-2 hover:bg-accent"
+                className="btn-ghost focus-ring"
               >
                 Create Trade
               </Link>
               <Link
                 href="/dashboard"
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md px-3 py-2 hover:bg-accent"
+                className="btn-ghost focus-ring"
               >
                 Dashboard
               </Link>
@@ -49,7 +49,7 @@ export function AppNav() {
             ) : (
               <Link
                 href="/sign-in"
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md px-3 py-2 hover:bg-accent"
+                className="btn-ghost focus-ring"
               >
                 Sign in
               </Link>
@@ -63,19 +63,19 @@ export function AppNav() {
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-border">
           <Link
             href="/"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors block px-3 py-2 rounded-md hover:bg-accent"
+            className="btn-ghost focus-ring block"
           >
             Home
           </Link>
           <Link
             href="/trade"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors block px-3 py-2 rounded-md hover:bg-accent"
+            className="btn-ghost focus-ring block"
           >
             Create Trade
           </Link>
           <Link
             href="/dashboard"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors block px-3 py-2 rounded-md hover:bg-accent"
+            className="btn-ghost focus-ring block"
           >
             Dashboard
           </Link>

@@ -8,6 +8,10 @@ const config: Config = {
     "./app/**/*.{ts,tsx,js,jsx,mdx}",
     "./lib/**/*.{ts,tsx,js,jsx,mdx}",
     "./src/**/*.{ts,tsx,js,jsx,mdx}",
+    "./hooks/**/*.{ts,tsx,js,jsx}",
+    "./data/**/*.{ts,tsx,js,jsx}",
+    "./scripts/**/*.{ts,tsx,js,jsx}",
+    "./*.{ts,tsx,js,jsx}",
   ],
   prefix: "",
   theme: {

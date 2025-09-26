@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} min-h-screen bg-bg text-fg antialiased`}>
+      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} min-h-screen theme-bg antialiased`}>
         <Providers>
           <ConditionalAppShell>
             {children}
