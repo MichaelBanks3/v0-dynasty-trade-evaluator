@@ -1,43 +1,35 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { useUser } from "@clerk/nextjs"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu"
-import { 
-  User, 
-  Settings, 
-  LogOut, 
-  BarChart3, 
-  Plus,
-  Menu,
-  X
-} from "lucide-react"
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { User, Settings, LogOut, BarChart3, Plus, Menu, X } from "lucide-react";
 
 interface AppShellProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const pathname = usePathname()
-  const { user, isSignedIn } = useUser()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const pathname = usePathname();
+  const { user, isSignedIn } = useUser();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     { href: "/trade", label: "Create Trade", icon: Plus },
     { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
-  ]
+  ];
 
-  const isActive = (href: string) => pathname === href
+  const isActive = (href: string) => pathname === href;
 
   return (
     <div className="min-h-screen bg-bg">
@@ -45,116 +37,129 @@ export function AppShell({ children }: AppShellProps) {
       <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur border-b border-[color:var(--border)]">
         <div className="h-1 w-full bg-[color:var(--primary)]" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-14">
-            {/* Left: App Name/Logo */}
-            <span className="font-semibold tracking-wide">Dynasty Trade Evaluator</span>
+          {/* Left: App Name/Logo */}
+          <span className="font-semibold tracking-wide">
+            Dynasty Trade Evaluator
+          </span>
 
-            {/* Center: Navigation Tabs (md+) */}
-            <nav className="hidden md:flex items-center gap-6 text-sm">
-              {navItems.map((item) => {
-                return (
-                  <Link 
-                    key={item.href} 
-                    href={item.href}
-                    className="hover:text-[color:var(--primary)] transition"
-                  >
-                    {item.label}
-                  </Link>
-                )
-              })}
-            </nav>
+          {/* Center: Navigation Tabs (md+) */}
+          <nav className="hidden md:flex items-center gap-6 text-sm">
+            {navItems.map((item) => {
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="hover:text-[color:var(--primary)] transition"
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
 
-            {/* Right: User Menu */}
-            <div className="flex items-center space-x-4">
-              {isSignedIn ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-9 px-3">
-                      <div className="flex items-center space-x-2">
-                        <div className="h-6 w-6 rounded-full bg-accent flex items-center justify-center">
-                          <User className="h-4 w-4 text-accent-contrast" />
-                        </div>
-                        <span className="hidden sm:block text-sm text-text">
-                          {user?.firstName || user?.emailAddresses[0]?.emailAddress}
-                        </span>
+          {/* Right: User Menu */}
+          <div className="flex items-center space-x-4">
+            {isSignedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-9 px-3">
+                    <div className="flex items-center space-x-2">
+                      <div className="h-6 w-6 rounded-full bg-accent flex items-center justify-center">
+                        <User className="h-4 w-4 text-accent-contrast" />
                       </div>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard" className="flex items-center">
-                        <BarChart3 className="h-4 w-4 mr-2" />
-                        Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/team" className="flex items-center">
-                        <Settings className="h-4 w-4 mr-2" />
-                        Team Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/sign-out" className="flex items-center text-destructive">
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Sign Out
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href="/sign-in">Sign In</Link>
+                      <span className="hidden sm:block text-sm text-text">
+                        {user?.firstName ||
+                          user?.emailAddresses[0]?.emailAddress}
+                      </span>
+                    </div>
                   </Button>
-                  <Button size="sm" className="bg-accent text-accent-contrast hover:bg-accent/90" asChild>
-                    <Link href="/sign-up">Sign Up</Link>
-                  </Button>
-                </div>
-              )}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="flex items-center">
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/team" className="flex items-center">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Team Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/sign-out"
+                      className="flex items-center text-destructive"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/sign-in">Sign In</Link>
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-accent text-accent-contrast hover:bg-accent/90"
+                  asChild
+                >
+                  <Link href="/sign-up">Sign Up</Link>
+                </Button>
+              </div>
+            )}
 
-              {/* Mobile menu button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="md:hidden h-9 px-2"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? (
-                  <X className="h-5 w-5" />
-                ) : (
-                  <Menu className="h-5 w-5" />
-                )}
-              </Button>
+            {/* Mobile menu button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden h-9 px-2"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-border/50 bg-surface">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Button
+                      variant={isActive(item.href) ? "default" : "ghost"}
+                      size="sm"
+                      className={`w-full justify-start h-10 ${
+                        isActive(item.href)
+                          ? "bg-accent text-accent-contrast"
+                          : "text-subtext hover:text-text hover:bg-muted/50"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 mr-3" />
+                      {item.label}
+                    </Button>
+                  </Link>
+                );
+              })}
             </div>
           </div>
-
-          {/* Mobile Navigation Menu */}
-          {mobileMenuOpen && (
-            <div className="md:hidden border-t border-border/50 bg-surface">
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                {navItems.map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)}>
-                      <Button
-                        variant={isActive(item.href) ? "default" : "ghost"}
-                        size="sm"
-                        className={`w-full justify-start h-10 ${
-                          isActive(item.href)
-                            ? "bg-accent text-accent-contrast"
-                            : "text-subtext hover:text-text hover:bg-muted/50"
-                        }`}
-                      >
-                        <Icon className="h-4 w-4 mr-3" />
-                        {item.label}
-                      </Button>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </header>
 
       {/* Main Content */}
@@ -162,5 +167,5 @@ export function AppShell({ children }: AppShellProps) {
         {children}
       </main>
     </div>
-  )
+  );
 }
